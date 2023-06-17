@@ -4,18 +4,8 @@
   {
     "lyria": {
       "id": 0,
-      "public": "966551199156-1630811110@g.us",
-      "admin": "966594931224-1605893639@g.us"
-    },
-    "valley": {
-      "id": 1,
-      "public": "120363039507094963@g.us",
-      "admin": "120363040229753128@g.us"
-    },
-    "taino": {
-      "id": 2,
-      "public": "966551199156-1630811131@g.us",
-      "admin": "966594931224-1623357209@g.us"
+      "public": "97474479336@c.us",
+      "admin": "120363028202077056@g.us"
     }
   },
   "autoResponses": [],
@@ -192,12 +182,12 @@
       "usage": "#جارفيس انمي @اسم_الأنمي",
       "onlyAdmin": false,
       "showInList": true,
-      "args": [
-        {
-          "index": "all",
-          "name": "animeName"
-        }
-      ]
+        "args": [
+            {
+            "index": "all",
+            "name": "animeName"
+            }
+        ]
     },
     {
       "gIds": "all",

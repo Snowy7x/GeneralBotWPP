@@ -3,6 +3,7 @@ import {Format} from "../utils/Format.js";
 import {Editor} from "../Controllers/Images.js";
 import {GetAnimeByName, Seasons, Status, Types} from "../Controllers/Anime.js";
 import pkg from "whatsapp-web.js";
+import {QuestionTypes} from "../Controllers/Competitions.js";
 const { MessageMedia } = pkg;
 
 class Bot {
@@ -20,6 +21,10 @@ class Bot {
     publicGroups = []
     formsHelp = ""
     sheets = []
+    /**
+     * @type {Competitions}
+     */
+    comps = null
 
     /**
      *
@@ -97,6 +102,12 @@ class Bot {
             if (commandName === " " || commandName === "") {
                 commandName = args.shift()
             }
+
+            if (this.comps && this.comps.hasCompetition(msg.from)) {
+                await msg.reply("يوجد مسابقة جارية، يرجى الانتظار حتى انتهاء المسابقة")
+                return
+            }
+
             if (this.formsCommand.includes(commandName)) {
                 // OLD WAY
                 /*if (this.adminGroups.includes(msg.from)) {
@@ -220,6 +231,61 @@ class Bot {
                             return
                         }
                         switch (command.type) {
+                            case "comp":
+                                if (args.length < 1) {
+                                    await msg.reply(command.usage)
+                                    return
+                                }
+                                if (!chat.isGroup) {
+                                    await msg.reply("هذا الأمر للمجموعات فقط")
+                                    return
+                                }
+
+                                if (this.comps.hasCompetition(msg.from)) {
+                                    await msg.reply("لديك مسابقة قيد التقديم")
+                                    return
+                                }
+
+                                let types = ""
+                                for (let type in QuestionTypes) {
+                                    types += QuestionTypes[type] + ", "
+                                }
+
+                                let comType = this.getArg(command, args, "type")
+                                if (!comType) {
+                                    await msg.reply("الأنواع المتاحة: " + types)
+                                    return
+                                }
+
+                                // check if the type is valid
+                                if (Object.values(QuestionTypes).indexOf(comType) < 0) {
+                                    await msg.reply("الأنواع المتاحة: " + types)
+                                    return
+                                }
+
+                                let questionsCount = this.getArg(command, args, "questions")
+                                if (!questionsCount) {
+                                    await msg.reply("يجب تحديد عدد الأسئلة")
+                                    return
+                                }
+                                if (isNaN(questionsCount)) {
+                                    await msg.reply("عدد الأسئلة يجب أن يكون رقم")
+                                    return
+                                }
+                                questionsCount = parseInt(questionsCount)
+                                if (questionsCount < 1) {
+                                    await msg.reply("عدد الأسئلة يجب أن يكون أكبر من 0")
+                                    return
+                                }
+
+                                let comp = this.comps.createCompetition(chat, questionsCount, comType);
+                                if (comp) {
+                                    await msg.reply("تم بدأ المسابقة")
+                                    comp.start()
+                                } else {
+                                    await msg.reply("لم أسطتع بدأ مسابقة في هذه المجموعة")
+                                }
+                                break;
                             case "sticker":
                                 await MediaToSticker(msg, this.client, this.name)
                                 break;
@@ -314,7 +380,12 @@ class Bot {
                                             await msg.reply(command.usage)
                                             return
                                         }
-                                        let anime = await GetAnimeByName(animeName)
+                                        let anime;
+                                        try {
+                                            let anime = await GetAnimeByName(animeName)
+                                        } catch (e) {
+                                            anime = null
+                                        }
                                         if (!anime) {
                                             await msg.reply("لم يتم العثور على الأنمي")
                                             return
@@ -328,9 +399,9 @@ class Bot {
                                             "animeEpisodes": anime.episodes?.count,
                                             "ageRating": anime.anime_age_rating,
                                             "animeRating": anime.anime_rating,
-                                            "animeGenre" : anime.anime_genres,
-                                            "animeType" : Types[anime.anime_type],
-                                            "animeSeason" : anime.anime_season.length > 0 ? Seasons[anime.anime_season] : "غير معروف",
+                                            "animeGenre": anime.anime_genres,
+                                            "animeType": Types[anime.anime_type],
+                                            "animeSeason": anime.anime_season.length > 0 ? Seasons[anime.anime_season] : "غير معروف",
                                         });
                                         let media = await MessageMedia.fromUrl(anime.anime_banner_image_url ?? anime.anime_cover_image_full_url ?? anime.anime_cover_image_url)
                                         await msg.reply(form, null, {
@@ -346,7 +417,6 @@ class Bot {
                                     case "حلقات":
                                         // TODO: ...
                                         break
-
 
                                 }
                                 break;
@@ -473,8 +543,9 @@ class Bot {
         return this.groupIds;
     }
 
-    InitClient(cl) {
+    InitClient(cl, comps) {
         this.client = cl;
+        this.comps = comps;
     }
 
     GetGroupCat(msgFrom) {

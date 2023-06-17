@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import Bot from "../classes/Bot.js";
+import {Competitions} from "../Controllers/Competitions.js";
 
 // relative to the index.js file, not the Loader.js file
 let currFolder = path.resolve();
@@ -22,6 +23,7 @@ const ids = [];
 const bots = []
 
 Load();
+
 
 function Load(client = null) {
     groups.forEach(group => {
@@ -113,9 +115,9 @@ function runCommands(msg) {
 
 }
 
-function InitClient(client) {
+function InitClient(client, competitions) {
     for (let bot of bots) {
-        bot.InitClient(client)
+        bot.InitClient(client, competitions)
     }
 }
 
