@@ -255,7 +255,6 @@ class Bot {
                                 }
                                 await msg.reply("تم!")
                                 break
-                            case "text":
                             case "edit":
                                 // TODO: Check if the user is admin
                                 if (!isAdmin && chat.isGroup) {
@@ -307,6 +306,7 @@ class Bot {
                                     }
                                 }
                                 break;
+                            case "text":
                             default:
                                 let response = Array.isArray(command.response) ? command.response[Math.floor(Math.random() * command.response.length)] : command.response;
                                 if (args.length > 0) {
