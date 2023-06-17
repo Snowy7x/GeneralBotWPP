@@ -382,7 +382,7 @@ class Bot {
                                         }
                                         let anime;
                                         try {
-                                            let anime = await GetAnimeByName(animeName)
+                                            anime = await GetAnimeByName(animeName)
                                         } catch (e) {
                                             anime = null
                                         }
