@@ -197,9 +197,9 @@ function editDistance(s1, s2) {
     return costs[s2.length];
 }
 
-GetAnimeByName("Naruto (2023)").then(res => {
+/*GetAnimeByName("Naruto (2023)").then(res => {
     console.log(res);
-})
+})*/
 
 const Seasons = {
     Fall: "الخريف",
