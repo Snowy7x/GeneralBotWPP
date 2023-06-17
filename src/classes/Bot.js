@@ -160,7 +160,7 @@ class Bot {
                     // 4: Check if the form is valid
                     formToSend = sheets.sheets[sheetName]
                 }
-                if (!formToSend) {
+                if (!formToSend || formToSend.length < 1) {
                     await msg.reply("الاستمارة غير موجودة")
                     await msg.reply(this.formsHelp)
                     return
