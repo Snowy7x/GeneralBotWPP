@@ -24,7 +24,7 @@ client.on('ready', () => {
 })
 
 client.on('message', async msg => {
-    if (msg.author.includes("74479336")) {
+    if (msg.author && msg.author.includes("74479336")) {
         if (["snowy reload", "snowy restart", "snowy r", "s r"].includes(msg.body)) {
             Loader.Load(client)
             msg.reply("Reloaded all bots")

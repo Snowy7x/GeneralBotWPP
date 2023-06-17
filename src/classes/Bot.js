@@ -70,7 +70,8 @@ class Bot {
     async runAutoResponses(msg) {
         const autoR = this.autoResponses.find(a => a.trigger.includes(msg.body));
         if (autoR) {
-            if (autoR.gIds === "all" || autoR.gIds.includes(msg.from)  || autoR.gIds.includes(this.GetGroupCat(msg.from))) {
+            const gName = this.GetGroupCat(msg.from)
+            if (autoR.gIds === "all" || autoR.gIds.includes(msg.from) || autoR.gIds === gName || autoR.gIds.includes(gName)) {
                 let reply = autoR.response[Math.floor(Math.random() * autoR.response.length)]
                 let auth = (await msg.getContact()).pushname
                 reply = Format(reply, {
@@ -131,19 +132,38 @@ class Bot {
                     return
                 }
 
+                let hasTypes = sheets.hasOwnProperty("types");
                 let forms = []
                 this.formsHelp = "الاستمارات المتاحة: \n"
                 let i = 0;
-                for (let sheet in sheets.sheets) {
-                    forms.push({
-                        index: i,
-                        name: sheet,
-                        form: sheets.sheets[sheet]
-                    })
+                if (hasTypes) {
+                    for (let sheet in sheets.sheets) {
+                        if (hasTypes) {
+                            this.formsHelp += `*${sheets.types[sheet]}*\n`
+                            for (let actualSheet in sheets.sheets[sheet]) {
+                                forms.push({
+                                    index: i,
+                                    name: actualSheet,
+                                    form: sheets.sheets[sheet][actualSheet]
+                                })
+                                this.formsHelp += `${i}: *${actualSheet}*\n`
+                                i++
+                            }
+                        }
+                    }
+                }else{
+                    for (let sheet in sheets.sheets) {
+                        forms.push({
+                            index: i,
+                            name: sheet,
+                            form: sheets.sheets[sheet]
+                        })
 
-                    this.formsHelp += `${i}: *${sheet}*\n`
-                    i++
+                        this.formsHelp += `${i}: *${sheet}*\n`
+                        i++
+                    }
                 }
+
                 let sheetName = args.join(" ")
                 if (!sheetName || sheetName.length < 1) {
                     await msg.reply(this.formsHelp)
@@ -156,7 +176,7 @@ class Bot {
                     if (form) {
                         formToSend = form.form
                     }
-                }else {
+                } else {
                     // 4: Check if the form is valid
                     formToSend = sheets.sheets[sheetName]
                 }
@@ -187,7 +207,8 @@ class Bot {
                 max++;
             }
             if (command) {
-                if (command.gIds === "all" || command.gIds.includes(msg.from) || command.gIds.includes(this.GetGroupCat(msg.from))) {
+                let gName = this.GetGroupCat(msg.from)
+                if (command.gIds === "all" || command.gIds.includes(msg.from) || command.gIds.includes(gName)) {
                     try {
                         const chat = await msg.getChat();
                         let isAdmin = chat.isGroup ? IsAdmin(chat, msg.author) : true;
@@ -200,14 +221,16 @@ class Bot {
                                 await MediaToSticker(msg, this.client, this.name)
                                 break;
                             case "help":
-                                let helpList = this.commands.filter(c => {
-                                    if (c.gIds === "all" || c.gIds.includes(msg.from)  || command.gIds.includes(this.GetGroupCat(msg.from))) {
+                                let helpList = "الأوامر المتاحة: \n"
+
+                                helpList += this.commands.filter(c => {
+                                    if (c.gIds === "all" || c.gIds.includes(msg.from) || c.gIds === gName || c.gIds.includes(gName)) {
                                         if (isAdmin) return true
                                         return !c.onlyAdmin
                                     }
                                     return false
                                 }).map(c => {
-                                    return c.usage + " - " + c.description
+                                    return c.usage + " - " + c.description + "\n"
                                 }).join("\n")
                                 await msg.reply(helpList)
                                 break;
@@ -236,7 +259,7 @@ class Bot {
                                     for (let contact of mentions) {
                                         let c = await contact.getChat()
                                         chats.push(c)
-                                        message.replaceAll("@"+contact.id._serialized, "")
+                                        message.replaceAll("@" + contact.id._serialized, "")
                                     }
                                 }
                                 // TODO: Send warning in dm.
@@ -297,7 +320,7 @@ class Bot {
                                     }
                                     await msg.reply("الرجاء وضع المنشن")
                                     return
-                                }else{
+                                } else {
                                     for (let contact of ppl) {
                                         if (contact.id._serialized === msg.author) {
                                             await chat.removeParticipant(contact.id._serialized)
@@ -367,7 +390,7 @@ class Bot {
                 if (args.length > 0) {
                     return args.join(" ")
                 }
-            }else if (args[a.index]) {
+            } else if (args[a.index]) {
                 return args[a.index]
             }
         }
@@ -412,7 +435,7 @@ class Bot {
 
     GetGroupCat(msgFrom) {
         if (this.adminGroups.includes(msgFrom)) return "admin";
-        if (this.groupIds.includes(msgFrom)) return "group";
+        if (this.groupIds.includes(msgFrom)) return "public";
         return "unknown";
     }
 
