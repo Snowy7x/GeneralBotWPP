@@ -44,7 +44,7 @@
     "#جارفيس",
     "#snowy"
   ],
-  "defaultResponse": "هلا؟",
+  "defaultResponse": "استخدم: #جارفيس مساعدة لمعرفة الأوامر المتاحة لك",
   "commands": [
     {
       "gIds": "all",

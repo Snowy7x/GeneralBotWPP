@@ -187,7 +187,6 @@ class Bot {
                 max++;
             }
             if (command) {
-                console.log(command.gIds.includes(this.GetGroupCat(msg.from)))
                 if (command.gIds === "all" || command.gIds.includes(msg.from) || command.gIds.includes(this.GetGroupCat(msg.from))) {
                     try {
                         const chat = await msg.getChat();

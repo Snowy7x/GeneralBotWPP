@@ -31,6 +31,10 @@ client.on('message', async msg => {
             return
         }
 
+        if (["snowy get", "snowy g"].includes(msg.body)) {
+            return msg.reply(msg.from)
+        }
+
         /*if (msg.body === "print") {
             console.log(forms)
             return;

@@ -104,7 +104,6 @@ function runCommands(msg) {
             commandName = args.shift().toLowerCase();
         }
 
-        console.log(prefix, commandName, args)
         for (let bot of bots) {
             if (bot.canReply(msg, prefix)) {
                 bot.runCommands(msg, commandName, args);
