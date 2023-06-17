@@ -197,6 +197,28 @@
       "usage": "#جارفيس طرد @المنشن1 @المنشن2 ...",
       "onlyAdmin": true,
       "showInList": false
+    },
+
+    {
+      "gIds": "all",
+      "command": "انمي",
+      "alies": [
+        "انمي",
+        "أنمي"
+      ],
+      "type": "anime",
+      "response": "الأسم: *{animeName}*\n\nسنة الانتاج: {animeYear}\nالتصنيف العمري: {animeRating}\nالتصنيف: {animeGenre}\nعدد الحلقات: {animeEpisodes}\nالنوع: {animeType}\nالموسم: {animeSeason}\nالحالة: {animeStatus}\n\nالوصف: {animeDesc}\n",
+      "description": "معلومات عن أنمي معين",
+      "failResponse": "خطأ فالطرد !",
+      "usage": "#جارفيس انمي @اسم_الأنمي",
+      "onlyAdmin": false,
+      "showInList": true,
+        "args": [
+            {
+            "index": "all",
+            "name": "animeName"
+            }
+        ]
     }
   ],
   "hasForms": true,

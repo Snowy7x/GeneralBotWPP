@@ -97,8 +97,8 @@ async function GetEpisodes(animeId) {
 async function Search (term) {
     let latestAddedAnimes = {
         "_offset": 0,
-        "_limit": 20,
-        "_order_by":"anime_year_desc",
+        "_limit": 50,
+        "_order_by":"anime_name_asc",
         "list_type":"filter",
         "just_info":"Yes",
         "anime_name": term ?? "",
@@ -133,6 +133,96 @@ async function Search (term) {
         });
 }
 
-export {GetLatestEpisodes, GetTopAnime, GetDetails, GetEpisodes};
+async function GetAnimeByName(animeName) {
+    let results = await Search(animeName);
+    if (results.code === 200) {
+        if (results.data.length === 0) {
+            return null;
+        }
+        // Get the anime with the most similar name
+        let anime = await GetDetails(results.data[0].anime_id);
+        let similarityScore = similarity(anime.anime_name, animeName);
+        for (let i = 1; i < results.data.length; i++) {
+            let anime2 = results.data[i];
+            let similarityScore2 = similarity(anime2.anime_name, animeName);
+            console.log(anime2.anime_name + " " + similarityScore2);
+            if (similarityScore2 > similarityScore) {
+                anime = await  GetDetails(anime2.anime_id);
+                similarityScore = similarityScore2;
+            }
+        }
+        return anime;
+    }else {
+        return null;
+    }
+}
+function similarity(s1, s2) {
+    var longer = s1;
+    var shorter = s2;
+    if (s1.length < s2.length) {
+        longer = s2;
+        shorter = s1;
+    }
+    var longerLength = longer.length;
+    if (longerLength == 0) {
+        return 1.0;
+    }
+    return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
+}
+
+function editDistance(s1, s2) {
+    s1 = s1.toLowerCase();
+    s2 = s2.toLowerCase();
+
+    var costs = new Array();
+    for (var i = 0; i <= s1.length; i++) {
+        var lastValue = i;
+        for (var j = 0; j <= s2.length; j++) {
+            if (i == 0)
+                costs[j] = j;
+            else {
+                if (j > 0) {
+                    var newValue = costs[j - 1];
+                    if (s1.charAt(i - 1) != s2.charAt(j - 1))
+                        newValue = Math.min(Math.min(newValue, lastValue),
+                            costs[j]) + 1;
+                    costs[j - 1] = lastValue;
+                    lastValue = newValue;
+                }
+            }
+        }
+        if (i > 0)
+            costs[s2.length] = lastValue;
+    }
+    return costs[s2.length];
+}
+
+GetAnimeByName("Naruto (2023)").then(res => {
+    console.log(res);
+})
+
+const Seasons = {
+    Fall: "الخريف",
+    Winter: "الشتاء",
+    Spring: "الربيع",
+    Summer: "الصيف",
+}
+
+const Status = {
+    "Currently Airing": "مستمر",
+    "Finished Airing": "منتهي",
+    "Not Yet Aired": "لم يبدأ بعد",
+}
+
+const Types = {
+    TV: "مسلسل",
+    Movie: "فيلم",
+    OVA: "أوفا",
+    ONA: "أونا",
+    Special: "حلقة خاصة",
+    Music: "موسيقى",
+}
+
+export {GetLatestEpisodes, GetTopAnime, GetDetails, GetAnimeByName, GetEpisodes, Search, Seasons, Status, Types};
 
 

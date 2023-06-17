@@ -1,6 +1,8 @@
 import {MediaToSticker, IsAdmin, GroupMention} from "../utils/Commands.js";
 import {Format} from "../utils/Format.js";
 import {Editor} from "../Controllers/Images.js";
+import {GetAnimeByName, Seasons, Status, Types} from "../Controllers/Anime.js";
+import {MessageMedia} from "whatsapp-web.js";
 
 class Bot {
     name = "Snowy";
@@ -300,6 +302,52 @@ class Bot {
                                 await Editor(type, msg, value)
                                 break;
                             case "anime":
+                                switch (commandName) {
+                                    case "أنمي":
+                                    case "anime":
+                                    case "انمي":
+                                    case "معلومات":
+                                        // TODO: Get the anime by name.
+                                        let animeName = this.getArg(command, args, "animeName")
+                                        if (!animeName) {
+                                            await msg.reply(command.usage)
+                                            return
+                                        }
+                                        let anime = await GetAnimeByName(animeName)
+                                        if (!anime) {
+                                            await msg.reply("لم يتم العثور على الأنمي")
+                                            return
+                                        }
+                                        let form = command.response
+                                        form = Format(form, {
+                                            "animeName": anime.anime_name,
+                                            "animeDesc": anime.anime_description,
+                                            "animeYear": anime.anime_release_year,
+                                            "animeStatus": Status[anime.anime_status],
+                                            "animeEpisodes": anime.episodes?.count,
+                                            "ageRating": anime.anime_age_rating,
+                                            "animeRating": anime.anime_rating,
+                                            "animeGenre" : anime.anime_genres,
+                                            "animeType" : Types[anime.anime_type],
+                                            "animeSeason" : anime.anime_season.length > 0 ? Seasons[anime.anime_season] : "غير معروف",
+                                        });
+                                        let media = await MessageMedia.fromUrl(anime.anime_banner_image_url ?? anime.anime_cover_image_full_url ?? anime.anime_cover_image_url)
+                                        await msg.reply(form, null, {
+                                            media: media,
+                                            sendSeen: true,
+                                        })
+                                        break;
+
+                                    case "بحث":
+                                        // TODO: ...
+                                        break
+
+                                    case "حلقات":
+                                        // TODO: ...
+                                        break
+
+
+                                }
                                 break;
                             case "manga":
                                 break;
