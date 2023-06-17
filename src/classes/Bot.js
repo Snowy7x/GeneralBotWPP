@@ -2,7 +2,8 @@ import {MediaToSticker, IsAdmin, GroupMention} from "../utils/Commands.js";
 import {Format} from "../utils/Format.js";
 import {Editor} from "../Controllers/Images.js";
 import {GetAnimeByName, Seasons, Status, Types} from "../Controllers/Anime.js";
-import {MessageMedia} from "whatsapp-web.js";
+import pkg from "whatsapp-web.js";
+const { MessageMedia } = pkg;
 
 class Bot {
     name = "Snowy";
