@@ -145,7 +145,6 @@ async function GetAnimeByName(animeName) {
         for (let i = 1; i < results.data.length; i++) {
             let anime2 = results.data[i];
             let similarityScore2 = similarity(anime2.anime_name, animeName);
-            console.log(anime2.anime_name + " " + similarityScore2);
             if (similarityScore2 > similarityScore) {
                 anime = await  GetDetails(anime2.anime_id);
                 similarityScore = similarityScore2;
