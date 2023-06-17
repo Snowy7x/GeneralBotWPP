@@ -293,7 +293,7 @@ class Bot {
                                     value = 60
                                 }
                                 // check if value is number
-                                if (isNaN(value)) {
+                                if (isNaN(value) && type !== "الوان") {
                                     await msg.reply("القيمة غير صحيحة")
                                     return
                                 }
@@ -313,21 +313,16 @@ class Bot {
                                         let quote = await msg.getQuotedMessage()
                                         let contact = await quote.getContact()
                                         if (quote.author === msg.author) {
-                                            await chat.removeParticipant(contact.id._serialized)
+                                            await chat.removeParticipants([contact.id._serialized])
                                             await msg.reply(command.response)
                                             return
                                         }
                                     }
                                     await msg.reply("الرجاء وضع المنشن")
-                                    return
                                 } else {
-                                    for (let contact of ppl) {
-                                        if (contact.id._serialized === msg.author) {
-                                            await chat.removeParticipant(contact.id._serialized)
-                                            await msg.reply(command.response)
-                                            return
-                                        }
-                                    }
+                                    let toKick = ppl.filter(p => p.id._serialized !== msg.author).map(p => p.id._serialized)
+                                    await chat.removeParticipants(toKick)
+                                    await msg.reply(command.response)
                                 }
                                 break;
                             case "text":

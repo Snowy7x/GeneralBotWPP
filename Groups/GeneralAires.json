@@ -163,12 +163,6 @@
       "usage": "#جارفيس الوان",
       "onlyAdmin": false,
       "sendTheRest": false,
-      "args": [
-        {
-          "index": 0,
-          "name": "value"
-        }
-      ],
       "showInList": true
     },
     {
