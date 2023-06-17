@@ -224,6 +224,7 @@ class Bot {
                                 /** @var Chat[] chats */
                                 let chats = []
                                 // TODO: If none try get from quote msg.
+                                let message = Array.isArray(command.response) ? command.response[Math.floor(Math.random() * command.response.length)] : command.response
                                 if (mentions.length < 1) {
                                     if (msg.hasQuotedMsg) {
                                         let quote = await msg.getQuotedMessage()
@@ -235,10 +236,11 @@ class Bot {
                                     for (let contact of mentions) {
                                         let c = await contact.getChat()
                                         chats.push(c)
+                                        message.replaceAll("@"+contact.id._serialized, "")
                                     }
                                 }
                                 // TODO: Send warning in dm.
-                                let message = Array.isArray(command.response) ? command.response[Math.floor(Math.random() * command.response.length)] : command.response
+                                // remove all mentions
                                 if (command.sendTheRest) {
                                     let r = this.getArg(command, args, "msg")
                                     if (!message) {
