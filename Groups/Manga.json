@@ -172,6 +172,22 @@
       "usage": "#جارفيس طرد @المنشن1 @المنشن2 ...",
       "onlyAdmin": true,
       "showInList": false
+    },
+    {
+      "gIds": "all",
+      "command": "خلفية",
+      "alies": [
+        "خلفية",
+        "خلفيات",
+        "خلفيه"
+      ],
+      "type": "image",
+      "response": "تم",
+      "description": "يستخدم لعرض خلفيات عن بحث معين",
+      "failResponse": "خطأ فتحميل الخلفيات !",
+      "usage": "#جارفيس خلفية اسم_الانمي_او_الشخصية",
+      "onlyAdmin": false,
+      "showInList": true
     }
   ],
   "hasForms": true,

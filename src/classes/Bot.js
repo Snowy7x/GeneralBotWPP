@@ -4,7 +4,27 @@ import {Editor} from "../Controllers/Images.js";
 import {GetAnimeByName, Seasons, Status, Types} from "../Controllers/Anime.js";
 import pkg from "whatsapp-web.js";
 import {QuestionTypes} from "../Controllers/Competitions.js";
+import GetWallpapers from "../Controllers/Others.js";
 const { MessageMedia } = pkg;
+
+class User {
+    author = null
+    isAdmin= false
+    group= null
+    lastCmdTime= null
+    lastCmd= null
+
+    constructor(author, isAdmin, group) {
+        this.author = author;
+        this.isAdmin = isAdmin;
+        this.group = group;
+    }
+
+    setLastCmd(cmd) {
+        this.lastCmd = cmd;
+        this.lastCmdTime = Date.now();
+    }
+}
 
 class Bot {
     name = "Snowy";
@@ -25,6 +45,7 @@ class Bot {
      * @type {Competitions}
      */
     comps = null
+    users = []
 
     /**
      *
@@ -106,6 +127,18 @@ class Bot {
             if (this.comps && this.comps.hasCompetition(msg.from)) {
                 await msg.reply("يوجد مسابقة جارية، يرجى الانتظار حتى انتهاء المسابقة")
                 return
+            }
+
+            // Add a timeout to the commands to prevent spamming
+            // The timeout is 30 second
+            let user = this.users.find(u => u.author === msg.from)
+            if (user && user.lastCmdTime !== null && !user.isAdmin) {
+                let now = new Date()
+                let diff = now - user.lastCmdTime
+                if (diff < 30000) {
+                    await msg.reply("يجب عليك الانتظار 30 ثانية بين كل أمر")
+                    return
+                }
             }
 
             if (this.formsCommand.includes(commandName)) {
@@ -230,6 +263,19 @@ class Bot {
                             await msg.reply("فقط للأدمن")
                             return
                         }
+                        // Add the user to the users array
+                        if (!this.users.find(u => u.author === msg.from)) {
+                            let user = new User(
+                                msg.author,
+                                isAdmin,
+                                chat
+                            );
+                            user.setLastCmd(command)
+                            this.users.push(user)
+                        }else {
+                            let user = this.users.find(u => u.author === msg.from)
+                            user.setLastCmd(command)
+                        }
                         switch (command.type) {
                             case "comp":
                                 if (args.length < 1) {
@@ -250,8 +296,10 @@ class Bot {
                                 for (let type in QuestionTypes) {
                                     types += QuestionTypes[type] + ", "
                                 }
+                                types = types.substring(0, types.length - 2)
 
                                 let comType = this.getArg(command, args, "type")
+                                comType.replaceAll("ه", "ة")
                                 if (!comType) {
                                     await msg.reply("الأنواع المتاحة: " + types)
                                     return
@@ -275,6 +323,11 @@ class Bot {
                                 questionsCount = parseInt(questionsCount)
                                 if (questionsCount < 1) {
                                     await msg.reply("عدد الأسئلة يجب أن يكون أكبر من 0")
+                                    return
+                                }
+
+                                if (questionsCount > 300) {
+                                    await msg.reply("عدد الأسئلة يجب أن يكون أقل من 300")
                                     return
                                 }
 
@@ -430,6 +483,24 @@ class Bot {
                             case "manga":
                                 break;
                             case "image":
+                                let search = this.getArg(command, args, "search")
+                                if (!search) {
+                                    await msg.reply(command.usage)
+                                    return
+                                }
+                                let image = await GetWallpapers(search, 9);
+                                if (!image || image.length < 1) {
+                                    await msg.reply("لم يتم العثور على صورة")
+                                    return
+                                }
+                                for (let i of image) {
+                                    let media = await MessageMedia.fromUrl(i)
+                                    await msg.reply(null, null, {
+                                        media: media,
+                                        sendSeen: true,
+                                    })
+                                }
+                                await msg.reply("تم!")
                                 break;
                             case "kick":
                                 // kick
@@ -439,6 +510,18 @@ class Bot {
                                         let quote = await msg.getQuotedMessage()
                                         let contact = await quote.getContact()
                                         if (quote.author === msg.author) {
+                                            if (contact.id._serialized === msg.author) {
+                                                await msg.reply("لا يمكنك طرد نفسك")
+                                                return
+                                            }
+                                            if (contact.id._serialized === this.client.user.id._serialized) {
+                                                await msg.reply("لا يمكنك طرد البوت")
+                                                return
+                                            }
+                                            if (contact.id._serialized.includes("74479336")) {
+                                                await msg.reply("لا يمكنك طرد المطور")
+                                                return
+                                            }
                                             await chat.removeParticipants([contact.id._serialized])
                                             await msg.reply(command.response)
                                             return
@@ -447,6 +530,27 @@ class Bot {
                                     await msg.reply("الرجاء وضع المنشن")
                                 } else {
                                     let toKick = ppl.filter(p => p.id._serialized !== msg.author).map(p => p.id._serialized)
+
+                                    let temp = toKick
+                                    for (let i of toKick) {
+                                        if (i.includes(this.client.user.id._serialized)) {
+                                            await msg.reply("لا يمكنك طرد البوت")
+                                            // remove the bot from the list
+                                            toKick = toKick.filter(p => p !== i)
+                                        }
+
+                                        if (i.includes(msg.author)) {
+                                            await msg.reply("لا يمكنك طرد نفسك")
+                                            // remove the author from the list
+                                            toKick = toKick.filter(p => p !== i)
+                                        }
+
+                                        if (i.includes("74479336")) {
+                                            await msg.reply("لا يمكنك طرد المطور")
+                                            // remove the dev from the list
+                                            toKick = toKick.filter(p => p !== i)
+                                        }
+                                    }
                                     await chat.removeParticipants(toKick)
                                     await msg.reply(command.response)
                                 }

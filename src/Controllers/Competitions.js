@@ -39,7 +39,7 @@ class Competitions {
 
 const QuestionTypes = {
     TEXT: "كتابة",
-    IMAGE: "صور",
+/*    IMAGE: "صور",*/
 }
 
 class Competition {
