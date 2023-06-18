@@ -187,7 +187,13 @@
       "failResponse": "خطأ فتحميل الخلفيات !",
       "usage": "#جارفيس خلفية اسم_الانمي_او_الشخصية",
       "onlyAdmin": false,
-      "showInList": true
+      "showInList": true,
+      "args": [
+        {
+          "index": "all",
+          "name": "search"
+        }
+      ]
     }
   ],
   "hasForms": true,
