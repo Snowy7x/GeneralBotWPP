@@ -186,7 +186,7 @@
         "أنمي"
       ],
       "type": "anime",
-      "response": "الأسم: *{animeName}*\n\nسنة الانتاج: {animeYear}\nالتصنيف العمري: {animeRating}\nالتصنيف: {animeGenre}\nعدد الحلقات: {animeEpisodes}\nالنوع: {animeType}\nالموسم: {animeSeason}\nالحالة: {animeStatus}\n\nالوصف: {animeDesc}\n",
+      "response": "الأسم: *{animeName}*\n\nسنة الانتاج: {animeYear}\nالتقييم: {animeRating}\nالتصنيف العمري: {ageRating}\nالتصنيف: {animeGenre}\nعدد الحلقات: {animeEpisodes}\nالنوع: {animeType}\nالموسم: {animeSeason}\nالحالة: {animeStatus}\n\nالوصف: {animeDesc}\n",
       "description": "معلومات عن أنمي معين",
       "failResponse": "خطأ فايجاد الأنمي !",
       "usage": "#جارفيس انمي @اسم_الأنمي",
@@ -221,6 +221,28 @@
         {
           "index": 1,
           "name": "questions"
+        }
+      ]
+    },
+    {
+      "gIds": "all",
+      "command": "خلفية",
+      "alies": [
+        "خلفية",
+        "خلفيات",
+        "خلفيه"
+      ],
+      "type": "image",
+      "response": "تم",
+      "description": "يستخدم لعرض خلفيات عن بحث معين",
+      "failResponse": "خطأ فتحميل الخلفيات !",
+      "usage": "#جارفيس خلفية اسم_الانمي_او_الشخصية",
+      "onlyAdmin": false,
+      "showInList": true,
+      "args": [
+        {
+          "index": "all",
+          "name": "search"
         }
       ]
     }
