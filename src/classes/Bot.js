@@ -349,11 +349,6 @@ class Bot {
                                 await msg.reply("تم!")
                                 break
                             case "edit":
-                                // TODO: Check if the user is admin
-                                if (!isAdmin && chat.isGroup) {
-                                    await msg.reply("فقط للأدمن")
-                                    return
-                                }
                                 let m = this.getAllArgsToValues(command, args)
                                 let type = commandName
                                 let value = m["value"]
@@ -365,6 +360,18 @@ class Bot {
                                 if (isNaN(value) && type !== "الوان") {
                                     await msg.reply("القيمة غير صحيحة")
                                     return
+                                }
+                                if (type !== "الوان") {
+                                    value = parseInt(value)
+                                    if (value < 1) {
+                                        await msg.reply("القيمة يجب أن تكون أكبر من 0")
+                                        return
+                                    }
+
+                                    if (value > 100) {
+                                        await msg.reply("القيمة يجب أن تكون أقل من 100")
+                                        return
+                                    }
                                 }
                                 await Editor(type, msg, value)
                                 break;
