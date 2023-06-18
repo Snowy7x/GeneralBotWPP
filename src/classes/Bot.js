@@ -488,7 +488,7 @@ class Bot {
                                     await msg.reply(command.usage)
                                     return
                                 }
-                                let image = await GetWallpapers(search, 9);
+                                let image = await GetWallpapers(search, 4);
                                 if (!image || image.length < 1) {
                                     await msg.reply("لم يتم العثور على صورة")
                                     return
