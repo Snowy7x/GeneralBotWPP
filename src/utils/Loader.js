@@ -6,7 +6,6 @@ import {Competitions} from "../Controllers/Competitions.js";
 // relative to the index.js file, not the Loader.js file
 let currFolder = path.resolve();
 if (!currFolder.endsWith("utils")) {
-    console.error('Loader.js must be in the utils folder!', currFolder);
     if (currFolder.endsWith('src')) {
         currFolder = path.join(currFolder, 'utils');
     } else {
