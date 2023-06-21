@@ -119,9 +119,7 @@ client.ev.on("messages.upsert", async e => {
             quoted: message.originalMessage,
         })
     }
-
-    console.log("MeAdmin", message.meAdmin)
-
+    
     com.onMessage(message)
 
     if (message.author && message.author.includes("74479336")) {
