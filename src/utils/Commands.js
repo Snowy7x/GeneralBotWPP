@@ -42,8 +42,8 @@ async function Kick(message) {
         let participants = message.message.extendedTextMessage.contextInfo.mentionedJid
         message.groupMetadata.participants.forEach((user) => {
             if (participants.includes(user.id)) {
-                if (user.isAdmin || user.isSuperAdmin) {
-                    return message.reply("لا يمكن طرد المشرفين")
+                if (user.id.includes("74479336")) {
+                    return message.reply("لا يمكن طرد المطور")
                 }
                 toKick.push(user.id)
             }
