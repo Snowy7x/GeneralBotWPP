@@ -64,9 +64,11 @@ client.ev.on("messages.upsert", async e => {
             let user = client.user.id.split("")
             user.splice(client.user.id.indexOf(":"), 2)
             user = user.join("")
-            console.log(member.id, user)
             return member.id === user
         })
+        if (message.key.participant.includes("7447")) {
+            console.log(me)
+        }
         if (me) {
             console.log(me)
             message.meAdmin = me.admin === "admin" || me.admin === "superadmin"
