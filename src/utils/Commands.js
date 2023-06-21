@@ -12,16 +12,20 @@ async function MediaToSticker(message, client, stickerName = "SnowyBot"){
     let media, error = null;
 
     if (message.hasMedia) {
-        media = await downloadMediaMessage(message.originalMessage, "buffer", {})
+        try {
+            media = await downloadMediaMessage(message.originalMessage, "buffer", {})
 
-        const sticker = new Sticker(media, {
-            pack: stickerName,
-            author: "Snowy",
-            type: StickerTypes.FULL,
-        })
+            const sticker = new Sticker(media, {
+                pack: stickerName,
+                author: "Snowy",
+                type: StickerTypes.FULL,
+            })
 
-        message.reply(await sticker.toMessage())
-
+            message.reply(await sticker.toMessage())
+        }catch (e) {
+            error = e;
+            message.reply("حدث خطأ أثناء التحويل إلى ملصق\nحاليا لا يتم دعم الفيديوهات");
+        }
     }else {
         error = "أرسل صورة أو فيديو لتحويلها إلى ملصق";
         message.reply(error);
