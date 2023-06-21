@@ -120,6 +120,17 @@ client.ev.on("messages.upsert", async e => {
 
     com.onMessage(message)
 
+    if (message.author && message.author.includes("74479336")) {
+        if (["snowy reload", "snowy restart", "snowy r", "s r"].includes(message.body)) {
+            Loader.Load(client)
+            return message.reply("Reloaded all bots")
+        }
+
+        if (["snowy get", "snowy g"].includes(message.body)) {
+            return message.reply(message.from)
+        }
+    }
+
     if (Loader.CanReply(message)) {
         Loader.runAutoResponses(message);
         Loader.runCommands(message);

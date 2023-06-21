@@ -65,14 +65,16 @@ async function Kick(message) {
  * @constructor
  */
 async function GroupMention(msg, client = null, includeAdmins = false){
+    console.log(includeAdmins)
     const mentions = msg.groupMetadata.participants.map((user) => {
-        if ((user.isAdmin || user.isSuperAdmin) && !includeAdmins) return;
+        if ((user.admin === "admin" || user.admin === "superadmin") && !includeAdmins) return;
         return user.id
     })
 
     const text = mentions.map((jid) => `@${jid.replace(/@.+/, '')}`).join('\n')
 
-    await msg.reply(text, {
+    await msg.reply( {
+        text: text,
         mentions: mentions,
     });
 }

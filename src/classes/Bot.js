@@ -6,6 +6,7 @@ import {QuestionTypes} from "../Controllers/Competitions.js";
 import GetRandomWallpapers from "../Controllers/Others.js";
 import {SendMessage} from "../Client.js";
 import {GetMangaByName, getMangaChapter} from "../Controllers/Manga.js";
+import {downloadMediaMessage} from "@whiskeysockets/baileys";
 
 class User {
     author = null
@@ -274,10 +275,11 @@ class Bot {
                             );
                             user.setLastCmd(command)
                             this.users.push(user)
-                        }else {
+                        } else {
                             let user = this.users.find(u => u.author === msg.from)
                             user.setLastCmd(command)
                         }
+                            console.log("Command type: " + command.type)
                         switch (command.type) {
                             case "comp":
                                 return msg.reply("هذا الأمر موقوف حاليا")
@@ -397,15 +399,15 @@ class Bot {
                                     let mentions = msg.message.extendedTextMessage.contextInfo.mentionedJid
 
                                     let text = Array.isArray(command.response) ? command.response[Math.floor(Math.random() * command.response.length)] : command.response
-                                    // replace all mentions
-                                    for (let mention of mentions) {
-                                        text.replaceAll("@" + mention.split("@")[0], "")
-                                    }
                                     if (command.sendTheRest) {
                                         let r = this.getArg(command, args, "msg")
                                         if (!text) {
                                             await msg.reply(command.usage)
                                             return
+                                        }
+                                        // replace all mentions
+                                        for (let mention of mentions) {
+                                            r = r.replaceAll("@" + mention.split("@")[0], "")
                                         }
                                         text = Format(text, {
                                             "msg": r
@@ -597,8 +599,50 @@ class Bot {
                                 // kick
                                 await Kick(msg)
                                 break;
+                            case "replacement":
+                                let text_ = Array.isArray(command.response) ? command.response[Math.floor(Math.random() * command.response.length)] : command.response;
+
+                                if (args.length > 0) {
+                                    let m = this.getAllArgsToValues(command, args)
+                                    if (m["mention"]){
+                                        if (msg.originalMessage.message?.extendedTextMessage?.contextInfo?.mentionedJid ||
+                                            msg.originalMessage.message?.imageMessage?.contextInfo?.mentionedJid) {
+                                            let mentions = msg.originalMessage.message?.extendedTextMessage?.contextInfo.mentionedJid || msg.originalMessage.message?.imageMessage?.contextInfo.mentionedJid
+                                            if (mentions.length > 0) {
+                                                m["mention"] = "@"+mentions[0].split("@")[0]
+                                            }
+                                        }else {
+                                            m["mention"] = ""
+                                        }
+                                    }
+                                    text_ = Format(text_, m)
+                                }
+
+                                if (command.includeAll) {
+                                    if (msg.hasMedia) {
+                                        let media = await downloadMediaMessage(msg.originalMessage, "buffer", {})
+                                        await SendMessage(msg.from, {
+                                            caption: text_,
+                                            image: media,
+                                            mentions: msg.message?.extendedTextMessage?.contextInfo?.mentionedJid || msg.message?.imageMessage?.contextInfo?.mentionedJid
+                                        })
+                                        return;
+                                    }else {
+                                        await SendMessage(msg.from, {
+                                            text: text_,
+                                            mentions: msg.message?.extendedTextMessage?.contextInfo?.mentionedJid || msg.message?.imageMessage?.contextInfo?.mentionedJid
+                                        })
+                                    }
+                                }else {
+                                    await SendMessage(msg.from, {
+                                        text: text_,
+                                        mentions: msg.message?.extendedTextMessage?.contextInfo?.mentionedJid || msg.message?.imageMessage?.contextInfo?.mentionedJid
+                                    })
+                                }
+                                break;
                             case "text":
                             default:
+                                console.log("Text")
                                 let response = Array.isArray(command.response) ? command.response[Math.floor(Math.random() * command.response.length)] : command.response;
                                 if (args.length > 0) {
                                     let m = this.getAllArgsToValues(command, args)
