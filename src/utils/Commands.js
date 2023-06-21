@@ -49,6 +49,8 @@ async function Kick(message) {
             }
         })
         console.log(toKick)
+        // remove the duplicate ids
+        toKick = [...new Set(toKick)]
         console.log(message.from)
         await client.groupParticipantsUpdate(message.from, toKick, "remove").catch((e) => {
             console.log(e)
