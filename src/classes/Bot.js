@@ -280,6 +280,7 @@ class Bot {
                         }
                         switch (command.type) {
                             case "comp":
+                                return msg.reply("هذا الأمر موقوف حاليا")
                                 switch (commandName) {
                                     case "مسابقة":
                                     case "مسابقه":
