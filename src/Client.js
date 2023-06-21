@@ -61,16 +61,16 @@ client.ev.on("messages.upsert", async e => {
         let groupMetadata = await client.groupMetadata(message.key.remoteJid)
         message.groupMetadata = groupMetadata
         let me = groupMetadata.participants.find(member => {
-            let user = client.user.id.split("")
-            user.splice(client.user.id.indexOf(":"), 2)
-            user = user.join("")
-            return member.id === user
+            let user = client.user.id.split("@")[0]
+            if (user.includes(":")) {
+                user = user.split(":")[0]
+            }
+            return member.id.includes(user)
         })
         if (message.key.participant.includes("7447")) {
             console.log(me)
         }
         if (me) {
-            console.log(me)
             message.meAdmin = me.admin === "admin" || me.admin === "superadmin"
         }
 
