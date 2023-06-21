@@ -38,7 +38,7 @@ client.ev.on("connection.update", async e => {
         Loader.InitClient(client, com)
     }
     if (e.connection) {
-        console.log(e.connection)
+        console.log(e)
     }
 })
 
