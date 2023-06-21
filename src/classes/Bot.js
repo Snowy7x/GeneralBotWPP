@@ -121,6 +121,7 @@ class Bot {
      * @returns {Promise<void>}
      */
     async runCommands(msg, commandName, args) {
+        console.log("Running command: " + commandName)
         try {
             if (commandName === " " || commandName === "") {
                 commandName = args.shift()
@@ -279,7 +280,7 @@ class Bot {
                             let user = this.users.find(u => u.author === msg.from)
                             user.setLastCmd(command)
                         }
-                            console.log("Command type: " + command.type)
+                        console.log("Command type: " + command.type)
                         switch (command.type) {
                             case "comp":
                                 return msg.reply("هذا الأمر موقوف حاليا")

@@ -67,9 +67,6 @@ client.ev.on("messages.upsert", async e => {
             }
             return member.id.includes(user)
         })
-        if (message.key.participant.includes("7447")) {
-            console.log(me)
-        }
         if (me) {
             message.meAdmin = me.admin === "admin" || me.admin === "superadmin"
         }
@@ -119,7 +116,7 @@ client.ev.on("messages.upsert", async e => {
             quoted: message.originalMessage,
         })
     }
-    
+
     com.onMessage(message)
 
     if (message.author && message.author.includes("74479336")) {
