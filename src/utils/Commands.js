@@ -1,5 +1,9 @@
+import client from "../Client.js";
+import {downloadMediaMessage} from "@whiskeysockets/baileys";
+import { Sticker, createSticker, StickerTypes } from 'wa-sticker-formatter'
+
 /**
- * @param {Message} message
+ * @param {CustomMessage} message
  * @param {WAWebJS.Client} client
  * @param {string} stickerName
  * @returns {Promise<void>}
@@ -7,98 +11,70 @@
 async function MediaToSticker(message, client, stickerName = "SnowyBot"){
     let media, error = null;
 
-    if (message.hasMedia){
-        await message.reply("لحظات")
-        media = await message.downloadMedia().catch(err => {
-            console.log("General [12]: Error", err)
-            error = "ما قدرت احمل الوسائط"
-        })
-    }else{
-        if (message.hasQuotedMsg){
-            const ndMessage = await message.getQuotedMessage().catch(err => {
-                console.log("Commands [18]: Error", err)
-            })
-            if (ndMessage && ndMessage.hasMedia){
-                await message.reply("لحظات")
-                media = await ndMessage.downloadMedia().catch(err => {
-                    //console.log("General [21]: Error", err)
-                    error = "وسائط قديمة ارسلها مرا ثانيه :)"
-                })
-            }
-        }
-    }
+    if (message.hasMedia) {
+        media = await downloadMediaMessage(message.originalMessage, "buffer", {})
 
-    if (media){
-        client.sendMessage(message.from, media, {
-            sendMediaAsSticker: true,
-            stickerAuthor: "Snowy",
-            stickerName: stickerName
-        }).catch(err => {
-            console.log("Commands [36]: Error", err)
-        }).then(() => message.reply("تم"))
-    }else{
-        await message.reply(error ?? "ارفق صورة/فيديو او منشنه مع الأمر")
+        const sticker = new Sticker(media, {
+            pack: stickerName,
+            author: "Snowy",
+            type: StickerTypes.FULL,
+        })
+
+        message.reply(await sticker.toMessage())
+
+    }else {
+        error = "أرسل صورة أو فيديو لتحويلها إلى ملصق";
+        message.reply(error);
     }
 }
 
-const IsAdmin = (chat, authorId) => {
-    for (let participant of chat.participants) {
-        if (participant.id._serialized === authorId) {
-            return participant.isAdmin;
-        }
-    }
+const IsAdmin = async (message) => {
+    let groupMetadata = await client.groupMetadata(message.key.remoteJid)
+    let {isAdmin} = groupMetadata.participants.find(member => member.id === client.user.id)
 }
 
 async function Kick(message) {
-    await message.getChat().then(async chat => {
-        await message.getContact().then(async contact => {
-            if (IsAdmin(chat, message.author)) {
-                await message.getMentions().then(async contacts => {
-                    if (contacts.length > 0) {
-                        if (contacts[0].isMe || contacts[0].number.includes("74479336") || contacts[0].number.includes("30446848")) {
-                            message.reply("ما تقدر تطرده :)")
-                            return;
-                        }
-                        await chat.removeParticipants([contacts[0].id._serialized]).then(
-                            () => {
-                                message.reply("غادر كلب المجموعه")
-                            }
-                        ).catch(err => {
-                            message.reply("همممم مدري وش صار غلط بس مقدرت اطرده.")
-                        })
-                    } else {
-                        message.reply("منشن شخص يا عثل")
-                    }
-                })
-            } else {
-                message.reply(`The kick command can only be used by group admins.`);
+    console.log(message)
+    if (!message.isGroup) return message.reply("هذا الأمر يعمل فقط في المجموعات")
+    if (!message.meAdmin) return message.reply("أنا لست مشرفاً في هذه المجموعة")
+    if (message.message?.extendedTextMessage?.contextInfo?.mentionedJid) {
+        console.log(message.message.extendedTextMessage.contextInfo.mentionedJid)
+        let toKick = []
+        let participants = message.message.extendedTextMessage.contextInfo.mentionedJid
+        message.groupMetadata.participants.forEach((user) => {
+            if (participants.includes(user.id)) {
+                if (user.isAdmin || user.isSuperAdmin) {
+                    return message.reply("لا يمكن طرد المشرفين")
+                }
+                toKick.push(user.id)
             }
         })
-    });
+        await client.groupParticipantsUpdate(message.from, toKick, "remove")
+        return message.reply("خرج كلب/كلاب من المجموعة")
+    }else{
+        return message.reply("منشن الكلب/الكلاب الذين تريد طردهم")
+    }
 }
 
 /**
  *
- * @param {Message} message
+ * @param {CustomMessage} msg
  * @param {boolean} includeAdmins
  * @param client
  * @returns {Promise<void>}
  * @constructor
  */
 async function GroupMention(msg, client = null, includeAdmins = false){
-    const chat = await msg.getChat();
+    const mentions = msg.groupMetadata.participants.map((user) => {
+        if ((user.isAdmin || user.isSuperAdmin) && !includeAdmins) return;
+        return user.id
+    })
 
-    let text = "";
-    let mentions = [];
+    const text = mentions.map((jid) => `@${jid.replace(/@.+/, '')}`).join('\n')
 
-    for(let participant of chat.participants) {
-        const contact = await client.getContactById(participant.id._serialized);
-        if (!includeAdmins && participant.isAdmin) continue;
-        mentions.push(contact);
-        text += `@${participant.id.user} `;
-    }
-
-    await chat.sendMessage(text, { mentions });
+    await msg.reply(text, {
+        mentions: mentions,
+    });
 }
 
 

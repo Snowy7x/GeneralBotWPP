@@ -1,5 +1,6 @@
 import {CharacterNames} from "./Anime.js";
-import client from "../Client.js";
+import client, {SendMessage} from "../Client.js";
+import {isSimilarWord} from "../utils/Format.js";
 
 class Competitions {
     competitions = [];
@@ -11,11 +12,13 @@ class Competitions {
 
     /**
      *
-     * @param {Message} message
+     * @param {CustomMessage} message
      */
 
     onMessage(message) {
-        let comp = this.competitions.find(c => c.group.id._serialized === message.from);
+        if (!message.isGroup) return;
+        if (this.competitions.length === 0) return;
+        let comp = this.competitions.find(c => c.group === message.from);
         if (comp) {
             comp.onMessage(message);
         }
@@ -26,7 +29,7 @@ class Competitions {
     }
 
     hasCompetition(group){
-        return this.competitions.find(c => c.group.id._serialized === group);
+        return this.competitions.find(c => c.group === group);
     }
 
     createCompetition(group, maxQuestions, type) {
@@ -35,18 +38,29 @@ class Competitions {
         this.competitions.push(comp);
         return comp;
     }
+
+    getCompetition(group){
+        return this.competitions.find(c => c.group === group);
+    }
+
+    forceFinish(group){
+        let comp = this.competitions.find(c => c.group === group);
+        if (comp) {
+            comp.finish();
+        }
+    }
 }
 
 const QuestionTypes = {
-    TEXT: "كتابة",
+    TEXT: "كتابه",
 /*    IMAGE: "صور",*/
 }
 
 class Competition {
     /**
-     * @type {GroupChat}
+     * @type {string}
      */
-    group = null;
+    group = "";
     maxQuestions = 0;
     questions = [];
     currentQuestion = 0;
@@ -82,56 +96,74 @@ class Competition {
     }
 
     start() {
-        this.nextQuestion();
+        this.nextQuestion(null);
     }
 
     /**
-     * @param {Message} message
+     * @param {CustomMessage} message
      */
     async onMessage(message) {
         switch (this.type) {
             case QuestionTypes.TEXT:
-                if (message.body === this.currentExpectedAnswer) {
-                    if ((this.participants.find(p => p.contact.id._serialized === message.author))) {
-                        this.participants.find(p => p.contact.id._serialized === message.author).points++;
+                if (isSimilarWord(message.body, this.currentExpectedAnswer)) {
+                    if ((this.participants.find(p => p.contact === message.author))) {
+                        this.participants.find(p => p.contact === message.author).points++;
                     } else {
-                        let contact = await client.getContactById(message.author);
-                        let p = new Participant(contact);
+                        let p = new Participant(message.author);
                         p.points++;
                         this.participants.push(p);
                     }
-                    this.nextQuestion();
+                    this.nextQuestion(message);
                 }
         }
     }
 
-    nextQuestion() {
+    async nextQuestion(message) {
         if (this.currentQuestion >= this.maxQuestions) {
-            this.finish();
+            await this.finish();
             return;
         }
-        this.group.sendMessage(`السؤال رقم ${this.currentQuestion + 1} من ${this.maxQuestions}`);
+        if (message) await message.reply("هنا\nالسؤال رقم " + (this.currentQuestion + 1)+ " من " + this.maxQuestions);
+        else await SendMessage(this.group, "السؤال رقم " + (this.currentQuestion + 1) + " من " + this.maxQuestions);
         this.currentQuestion++;
         switch (this.type) {
             case QuestionTypes.TEXT:
                 let q = this.question[Math.floor(Math.random() * this.question.length)];
+                while (this.usedQuestions.includes(q) || q.length <= 1) {
+                    q = this.question[Math.floor(Math.random() * this.question.length)];
+                }
+
                 // remove the question from the list:
                 this.question.splice(this.question.indexOf(q), 1);
                 this.usedQuestions.push(q);
                 this.currentExpectedAnswer = q;
-                this.group.sendMessage(`*${q}*`);
+                await SendMessage(this.group, `*${q}*`);
                 break;
         }
     }
 
     async finish() {
         // final message:
-        let msg = "المسابقة انتهت!\n";
+        let msg = "*المسابقة انتهت!*\n";
+        msg += "مجموع الأسئلة: " + this.currentQuestion + "\n";
         msg += "النتائج:\n";
-        for (let p of this.participants) {
-            msg += `@${p.contact.id.user}: ${p.points}\n`;
+
+        this.participants.sort((a, b) => b.points - a.points);
+        if (this.participants.length > 0) msg += "\nالأول: @" + this.participants[0].contact.split("@")[0] + " - " + this.participants[0].points;
+        if (this.participants.length > 1) msg += "\nالثاني: @" + this.participants[1].contact.split("@")[0] + " - " + this.participants[1].points;
+        if (this.participants.length > 2) msg += "\nالثالث: @" + this.participants[2].contact.split("@")[0] + " - " + this.participants[2].points;
+        if (this.participants.length > 3) {
+            msg += "\n\nالمشاركين:\n";
+            for (let p of this.participants) {
+                msg += `@${p.contact.split("@")[0]} - ${p.points}\n`;
+            }
         }
-        await this.group.sendMessage(msg, {mentions: this.participants.map(p => p.contact)});
+
+        await SendMessage(this.group, {
+            text: `${msg}`,
+            mentions: this.participants.map(p => p.contact)
+        });
+
         this.manager.onFinished(this);
     }
 }
@@ -139,9 +171,9 @@ class Competition {
 
 class Participant {
     /**
-     * @type {Contact}
+     * @type {string}
      */
-    contact = null;
+    contact = "";
     points = 0;
 
     constructor(user) {

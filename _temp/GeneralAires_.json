@@ -4,7 +4,7 @@
   {
     "lyria": {
       "id": 0,
-      "public": "97474479336@c.us",
+      "public": "97474479336@s.whatsapp.net",
       "admin": "120363028202077056@g.us"
     }
   },
@@ -160,7 +160,7 @@
         "طرد"
       ],
       "type": "kick",
-      "response": "تم الطرد",
+      "response": "*خرج كلب من المجموعة*!",
       "description": "يستخدم لطرد الأعضاء",
       "failResponse": "خطأ فالطرد !",
       "usage": "#جارفيس طرد @المنشن1 @المنشن2 ...",
@@ -176,18 +176,18 @@
         "أنمي"
       ],
       "type": "anime",
-      "response": "الأسم: *{animeName}*\n\nسنة الانتاج: {animeYear}\nالتصنيف العمري: {animeRating}\nالتصنيف: {animeGenre}\nعدد الحلقات: {animeEpisodes}\nالنوع: {animeType}\nالموسم: {animeSeason}\nالحالة: {animeStatus}\n\nالوصف: {animeDesc}\n",
+      "response": "الأسم: *{animeName}*\n\nسنة الانتاج: {animeYear}\nالتقييم: {animeRating}\nالتصنيف العمري: {ageRating}\nالتصنيف: {animeGenre}\nعدد الحلقات: {animeEpisodes}\nالنوع: {animeType}\nالموسم: {animeSeason}\nالحالة: {animeStatus}\n\nالوصف: {animeDesc}\n",
       "description": "معلومات عن أنمي معين",
       "failResponse": "خطأ فايجاد الأنمي !",
       "usage": "#جارفيس انمي @اسم_الأنمي",
       "onlyAdmin": false,
       "showInList": true,
-        "args": [
-            {
-            "index": "all",
-            "name": "animeName"
-            }
-        ]
+      "args": [
+        {
+          "index": "all",
+          "name": "animeName"
+        }
+      ]
     },
     {
       "gIds": "all",
@@ -211,6 +211,43 @@
         {
           "index": 1,
           "name": "questions"
+        }
+      ]
+    },
+    {
+      "gIds": "all",
+      "command": "انهاء",
+      "alies": [
+        "انهي",
+        "انهاء"
+      ],
+      "type": "comp",
+      "response": "",
+      "description": "أنهاء المسابقة",
+      "failResponse": "خطأ فانهاء المسابقة !",
+      "usage": "#جارفيس انهاء",
+      "onlyAdmin": true,
+      "showInList": true
+    },
+    {
+      "gIds": "all",
+      "command": "خلفية",
+      "alies": [
+        "خلفية",
+        "خلفيات",
+        "خلفيه"
+      ],
+      "type": "image",
+      "response": "تم",
+      "description": "يستخدم لعرض خلفيات عن بحث معين",
+      "failResponse": "خطأ فتحميل الخلفيات !",
+      "usage": "#جارفيس خلفية اسم_الانمي_او_الشخصية",
+      "onlyAdmin": false,
+      "showInList": true,
+      "args": [
+        {
+          "index": "all",
+          "name": "search"
         }
       ]
     }

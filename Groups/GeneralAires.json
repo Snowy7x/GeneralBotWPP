@@ -226,6 +226,21 @@
     },
     {
       "gIds": "all",
+      "command": "انهاء",
+      "alies": [
+        "انهي",
+        "انهاء"
+      ],
+      "type": "comp",
+      "response": "",
+      "description": "أنهاء المسابقة",
+      "failResponse": "خطأ فانهاء المسابقة !",
+      "usage": "#جارفيس انهاء",
+      "onlyAdmin": true,
+      "showInList": true
+    },
+    {
+      "gIds": "all",
       "command": "خلفية",
       "alies": [
         "خلفية",

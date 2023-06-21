@@ -1,11 +1,11 @@
-import {MediaToSticker, IsAdmin, GroupMention} from "../utils/Commands.js";
-import {Format} from "../utils/Format.js";
+import {MediaToSticker, IsAdmin, GroupMention, Kick} from "../utils/Commands.js";
+import {AraNumberToEng, Format} from "../utils/Format.js";
 import {Editor} from "../Controllers/Images.js";
 import {GetAnimeByName, Seasons, Status, Types} from "../Controllers/Anime.js";
-import pkg from "whatsapp-web.js";
 import {QuestionTypes} from "../Controllers/Competitions.js";
-import GetWallpapers from "../Controllers/Others.js";
-const { MessageMedia } = pkg;
+import GetRandomWallpapers from "../Controllers/Others.js";
+import {SendMessage} from "../Client.js";
+import {GetMangaByName, getMangaChapter} from "../Controllers/Manga.js";
 
 class User {
     author = null
@@ -29,6 +29,7 @@ class User {
 class Bot {
     name = "Snowy";
     prefixes = [];
+    /** @type {[] | string} */
     groups = [];
     autoResponses = [];
     defaultResponse = ""
@@ -53,7 +54,7 @@ class Bot {
      * @param {string[]} prefixes
      * @param {object} settings
      */
-    constructor(name, prefixes, settings, client) {
+    constructor(name, prefixes, settings) {
         this.name = name;
         this.groups = settings.groups;
         this.autoResponses = settings.autoResponses;
@@ -94,7 +95,7 @@ class Bot {
 
     /**
      *
-     * @param {Message} msg
+     * @param {CustomMessage} msg
      */
     async runAutoResponses(msg) {
         const autoR = this.autoResponses.find(a => a.trigger.includes(msg.body));
@@ -113,7 +114,7 @@ class Bot {
 
     /**
      *
-     * @param {Message} msg
+     * @param {CustomMessage} msg
      * @param {string} commandName
      * @param {string[]} args
      * @returns {Promise<void>}
@@ -124,15 +125,10 @@ class Bot {
                 commandName = args.shift()
             }
 
-            if (this.comps && this.comps.hasCompetition(msg.from)) {
-                await msg.reply("يوجد مسابقة جارية، يرجى الانتظار حتى انتهاء المسابقة")
-                return
-            }
-
             // Add a timeout to the commands to prevent spamming
             // The timeout is 30 second
             let user = this.users.find(u => u.author === msg.from)
-            if (user && user.lastCmdTime !== null && !user.isAdmin) {
+            if (user && user.lastCmdTime !== null) {
                 let now = new Date()
                 let diff = now - user.lastCmdTime
                 if (diff < 30000) {
@@ -257,9 +253,15 @@ class Bot {
                 let gName = this.GetGroupCat(msg.from)
                 if (command.gIds === "all" || command.gIds.includes(msg.from) || command.gIds.includes(gName)) {
                     try {
-                        const chat = await msg.getChat();
-                        let isAdmin = chat.isGroup ? IsAdmin(chat, msg.author) : true;
-                        if (command.onlyAdmin && !isAdmin && chat.isGroup) {
+                        if (this.comps && this.comps.hasCompetition(msg.from)) {
+                            if (command && command.type !== "comp") {
+                                await msg.reply("يوجد مسابقة جارية، يرجى الانتظار حتى انتهاء المسابقة")
+                                return
+                            }
+                        }
+                        const chat = msg.from
+                        let isAdmin = msg.isGroupAdmin;
+                        if (command.onlyAdmin && !isAdmin) {
                             await msg.reply("فقط للأدمن")
                             return
                         }
@@ -278,65 +280,90 @@ class Bot {
                         }
                         switch (command.type) {
                             case "comp":
-                                if (args.length < 1) {
-                                    await msg.reply(command.usage)
-                                    return
-                                }
-                                if (!chat.isGroup) {
-                                    await msg.reply("هذا الأمر للمجموعات فقط")
-                                    return
-                                }
+                                switch (commandName) {
+                                    case "مسابقة":
+                                    case "مسابقه":
+                                        if (args.length < 1) {
+                                            await msg.reply(command.usage)
+                                            return
+                                        }
+                                        if (!msg.isGroup) {
+                                            await msg.reply("هذا الأمر للمجموعات فقط")
+                                            return
+                                        }
 
-                                if (this.comps.hasCompetition(msg.from)) {
-                                    await msg.reply("لديك مسابقة قيد التقديم")
-                                    return
-                                }
+                                        if (this.comps.hasCompetition(msg.from)) {
+                                            await msg.reply("لديك مسابقة قيد التقديم")
+                                            return
+                                        }
 
-                                let types = ""
-                                for (let type in QuestionTypes) {
-                                    types += QuestionTypes[type] + ", "
-                                }
-                                types = types.substring(0, types.length - 2)
+                                        let types = ""
+                                        for (let type in QuestionTypes) {
+                                            types += QuestionTypes[type] + ", "
+                                        }
+                                        types = types.substring(0, types.length - 2)
 
-                                let comType = this.getArg(command, args, "type")
-                                comType.replaceAll("ه", "ة")
-                                if (!comType) {
-                                    await msg.reply("الأنواع المتاحة: " + types)
-                                    return
-                                }
+                                        let comType = this.getArg(command, args, "type")
 
-                                // check if the type is valid
-                                if (Object.values(QuestionTypes).indexOf(comType) < 0) {
-                                    await msg.reply("الأنواع المتاحة: " + types)
-                                    return
-                                }
+                                        if (!comType) {
+                                            await msg.reply("الأنواع المتاحة: " + types)
+                                            return
+                                        }
 
-                                let questionsCount = this.getArg(command, args, "questions")
-                                if (!questionsCount) {
-                                    await msg.reply("يجب تحديد عدد الأسئلة")
-                                    return
-                                }
-                                if (isNaN(questionsCount)) {
-                                    await msg.reply("عدد الأسئلة يجب أن يكون رقم")
-                                    return
-                                }
-                                questionsCount = parseInt(questionsCount)
-                                if (questionsCount < 1) {
-                                    await msg.reply("عدد الأسئلة يجب أن يكون أكبر من 0")
-                                    return
-                                }
+                                        // check if the type is valid
+                                        if (Object.values(QuestionTypes).indexOf(comType) < 0) {
+                                            await msg.reply("الأنواع المتاحة: " + types)
+                                            return
+                                        }
 
-                                if (questionsCount > 300) {
-                                    await msg.reply("عدد الأسئلة يجب أن يكون أقل من 300")
-                                    return
-                                }
+                                        let questionsCount = this.getArg(command, args, "questions")
+                                        if (!questionsCount) {
+                                            await msg.reply("يجب تحديد عدد الأسئلة")
+                                            return
+                                        }
+                                        if (isNaN(questionsCount)) {
+                                            await msg.reply("عدد الأسئلة يجب أن يكون رقم")
+                                            return
+                                        }
+                                        questionsCount = parseInt(questionsCount)
+                                        if (questionsCount < 1) {
+                                            await msg.reply("عدد الأسئلة يجب أن يكون أكبر من 0")
+                                            return
+                                        }
 
-                                let comp = this.comps.createCompetition(chat, questionsCount, comType);
-                                if (comp) {
-                                    await msg.reply("تم بدأ المسابقة")
-                                    comp.start()
-                                } else {
-                                    await msg.reply("لم أسطتع بدأ مسابقة في هذه المجموعة")
+                                        if (questionsCount > 300) {
+                                            await msg.reply("عدد الأسئلة يجب أن يكون أقل من 300")
+                                            return
+                                        }
+
+                                        let comp = this.comps.createCompetition(chat, questionsCount, comType);
+                                        if (comp) {
+                                            await msg.reply("تم بدأ المسابقة")
+                                            comp.start()
+                                        } else {
+                                            await msg.reply("لم أسطتع بدأ مسابقة في هذه المجموعة")
+                                        }
+                                        break;
+                                    case "انهي":
+                                    case "انهى":
+                                    case "انهاء":
+                                        if (!msg.isGroup) {
+                                            msg.reply("هذا الأمر للمجموعات فقط")
+                                        }
+
+                                        if (!msg.isGroupAdmin) {
+                                            msg.reply("فقط للأدمن")
+                                        }
+
+                                        if (!this.comps.hasCompetition(msg.from)) {
+                                            msg.reply("لا يوجد مسابقة قيد التقديم")
+                                            return
+                                        }
+
+                                        this.comps.forceFinish(msg.from)
+                                        msg.reply("تم إنهاء المسابقة")
+
+                                        break;
                                 }
                                 break;
                             case "sticker":
@@ -365,40 +392,31 @@ class Bot {
                                 break;
                             case "dm":
                                 // TODO: Check for mentions.
-                                const mentions = await msg.getMentions();
-                                /** @var Chat[] chats */
-                                let chats = []
-                                // TODO: If none try get from quote msg.
-                                let message = Array.isArray(command.response) ? command.response[Math.floor(Math.random() * command.response.length)] : command.response
-                                if (mentions.length < 1) {
-                                    if (msg.hasQuotedMsg) {
-                                        let quote = await msg.getQuotedMessage()
-                                        let contact = await quote.getContact()
-                                        let c = await contact.getChat()
-                                        chats.push(c)
+                                if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid) {
+                                    let mentions = msg.message.extendedTextMessage.contextInfo.mentionedJid
+
+                                    let text = Array.isArray(command.response) ? command.response[Math.floor(Math.random() * command.response.length)] : command.response
+                                    // replace all mentions
+                                    for (let mention of mentions) {
+                                        text.replaceAll("@" + mention.split("@")[0], "")
                                     }
-                                } else {
-                                    for (let contact of mentions) {
-                                        let c = await contact.getChat()
-                                        chats.push(c)
-                                        message.replaceAll("@" + contact.id._serialized, "")
+                                    if (command.sendTheRest) {
+                                        let r = this.getArg(command, args, "msg")
+                                        if (!text) {
+                                            await msg.reply(command.usage)
+                                            return
+                                        }
+                                        text = Format(text, {
+                                            "msg": r
+                                        })
+                                    }
+                                    for (let mention of mentions) {
+                                        SendMessage(mention, {
+                                            text: text,
+                                        })
                                     }
                                 }
-                                // TODO: Send warning in dm.
-                                // remove all mentions
-                                if (command.sendTheRest) {
-                                    let r = this.getArg(command, args, "msg")
-                                    if (!message) {
-                                        await msg.reply(command.usage)
-                                        return
-                                    }
-                                    message = Format(message, {
-                                        "msg": r
-                                    })
-                                }
-                                for (let c of chats) {
-                                    await c.sendMessage(message)
-                                }
+
                                 await msg.reply("تم!")
                                 break
                             case "edit":
@@ -433,13 +451,13 @@ class Bot {
                                     case "أنمي":
                                     case "anime":
                                     case "انمي":
-                                    case "معلومات":
                                         // TODO: Get the anime by name.
                                         let animeName = this.getArg(command, args, "animeName")
                                         if (!animeName) {
                                             await msg.reply(command.usage)
                                             return
                                         }
+                                        msg.reply("جاري البحث...")
                                         let anime;
                                         try {
                                             anime = await GetAnimeByName(animeName)
@@ -463,10 +481,9 @@ class Bot {
                                             "animeType": Types[anime.anime_type],
                                             "animeSeason": anime.anime_season.length > 0 ? Seasons[anime.anime_season] : "غير معروف",
                                         });
-                                        let media = await MessageMedia.fromUrl(anime.anime_banner_image_url ?? anime.anime_cover_image_full_url ?? anime.anime_cover_image_url)
-                                        await msg.reply(form, null, {
-                                            media: media,
-                                            sendSeen: true,
+                                        await msg.reply({
+                                            caption: form,
+                                            image: {url: anime.anime_banner_image_url ?? anime.anime_cover_image_full_url ?? anime.anime_cover_image_url}
                                         })
                                         break;
 
@@ -481,6 +498,81 @@ class Bot {
                                 }
                                 break;
                             case "manga":
+                                switch (commandName) {
+                                    case "مانجا":
+                                    case "manga":
+                                        // TODO: Get the anime by name.
+                                        let mangaName = this.getArg(command, args, "mangaName")
+                                        if (!mangaName) {
+                                            await msg.reply(command.usage)
+                                            return
+                                        }
+                                        msg.reply("جاري البحث...")
+                                        let manga;
+                                        try {
+                                            manga = await GetMangaByName(mangaName)
+                                        } catch (e) {
+                                            manga = null
+                                        }
+                                        if (!manga) {
+                                            await msg.reply("لم يتم العثور على المانجا")
+                                            return
+                                        }
+                                        let form = command.response
+                                        form = Format(form, {
+                                            "mangaName": manga.title,
+                                            "mangaDesc": manga.sum,
+                                            "mangaChapters": manga.chapters ?? manga.last_chapter ?? "غير معروف",
+                                            "mangaAuthors": manga.authors.join(", "),
+                                            "mangaRating": manga.rating,
+                                            "mangaGenre": manga.categories.join(", "),
+                                            "mangaType": manga.type,
+                                            "lastChapter": manga.last_chapter ?? "غير معروف",
+                                        });
+
+                                        await msg.reply({
+                                            caption: form,
+                                            image: {url: manga.img}
+                                        })
+                                        break;
+
+                                    case "بحث":
+                                        // TODO: ...
+                                        break
+
+                                    case "شابتر":
+                                    case "chapter":
+                                        // TODO: ...
+                                        let mangaName2 = this.getArg(command, args, "mangaName")
+                                        if (!mangaName2) {
+                                            await msg.reply(command.usage)
+                                            return
+                                        }
+                                        let chapter = this.getArg(command, args, "chapter")
+                                        if (!chapter) {
+                                            await msg.reply(command.usage)
+                                            return
+                                        }
+                                        if (isNaN(chapter)) {
+                                            let chapter = AraNumberToEng(chapter)
+                                            if (isNaN(chapter)) {
+                                                await msg.reply("رقم الشابتر غير صحيح")
+                                                return
+                                            }
+                                        }
+                                        msg.reply("جاري البحث...")
+                                        let result = await getMangaChapter(mangaName2, chapter)
+                                        if (result.code !== 200) {
+                                            await msg.reply("لم يتم العثور على الشابتر")
+                                            return
+                                        } else {
+                                            await msg.reply({
+                                                caption: result.message,
+                                                image: {url: result.img}
+                                            })
+                                        }
+                                        break
+                                }
                                 break;
                             case "image":
                                 let search = this.getArg(command, args, "search")
@@ -488,72 +580,21 @@ class Bot {
                                     await msg.reply(command.usage)
                                     return
                                 }
-                                let image = await GetWallpapers(search, 4);
-                                if (!image || image.length < 1) {
-                                    await msg.reply("لم يتم العثور على صورة")
+                                let wallpapers = await GetRandomWallpapers(search, 4)
+                                if (!wallpapers || wallpapers.length === 0) {
+                                    await msg.reply("لم يتم العثور على صور")
                                     return
                                 }
-                                for (let i of image) {
-                                    let media = await MessageMedia.fromUrl(i)
-                                    await msg.reply(null, null, {
-                                        media: media,
-                                        sendSeen: true,
+
+                                for (let wallpaper of wallpapers) {
+                                    msg.reply({
+                                        image: {url: wallpaper}
                                     })
                                 }
-                                await msg.reply("تم!")
                                 break;
                             case "kick":
                                 // kick
-                                const ppl = await msg.getMentions();
-                                if (ppl.length < 1) {
-                                    if (msg.hasQuotedMsg) {
-                                        let quote = await msg.getQuotedMessage()
-                                        let contact = await quote.getContact()
-                                        if (quote.author === msg.author) {
-                                            if (contact.id._serialized === msg.author) {
-                                                await msg.reply("لا يمكنك طرد نفسك")
-                                                return
-                                            }
-                                            if (contact.id._serialized === this.client.user.id._serialized) {
-                                                await msg.reply("لا يمكنك طرد البوت")
-                                                return
-                                            }
-                                            if (contact.id._serialized.includes("74479336")) {
-                                                await msg.reply("لا يمكنك طرد المطور")
-                                                return
-                                            }
-                                            await chat.removeParticipants([contact.id._serialized])
-                                            await msg.reply(command.response)
-                                            return
-                                        }
-                                    }
-                                    await msg.reply("الرجاء وضع المنشن")
-                                } else {
-                                    let toKick = ppl.filter(p => p.id._serialized !== msg.author).map(p => p.id._serialized)
-
-                                    let temp = toKick
-                                    for (let i of toKick) {
-                                        if (i.includes(this.client.user.id._serialized)) {
-                                            await msg.reply("لا يمكنك طرد البوت")
-                                            // remove the bot from the list
-                                            toKick = toKick.filter(p => p !== i)
-                                        }
-
-                                        if (i.includes(msg.author)) {
-                                            await msg.reply("لا يمكنك طرد نفسك")
-                                            // remove the author from the list
-                                            toKick = toKick.filter(p => p !== i)
-                                        }
-
-                                        if (i.includes("74479336")) {
-                                            await msg.reply("لا يمكنك طرد المطور")
-                                            // remove the dev from the list
-                                            toKick = toKick.filter(p => p !== i)
-                                        }
-                                    }
-                                    await chat.removeParticipants(toKick)
-                                    await msg.reply(command.response)
-                                }
+                                await Kick(msg)
                                 break;
                             case "text":
                             default:
@@ -564,7 +605,7 @@ class Bot {
                                 }
 
                                 if (command.includeAll) {
-                                    let chat = await msg.getChat()
+                                    /*let chat = await msg.getChat()
                                     let media = null
                                     if (msg.hasMedia) {
                                         media = await msg.downloadMedia();
@@ -574,11 +615,10 @@ class Bot {
                                         media: media,
                                         mentions: mentions
                                     })
-                                    return;
+                                    return;*/
                                 }
                                 await msg.reply(response);
                                 break;
-
                         }
                     } catch (e) {
                         await msg.reply(command.failResponse);
@@ -615,6 +655,14 @@ class Bot {
                 if (args.length > 0) {
                     return args.join(" ")
                 }
+            } else if (a.index === "all-1") {
+                if (args.length > 0) {
+                    return args.slice(0, args.length - 1).join(" ")
+                }
+            }else if (a.index === "last" || a.index === -1) {
+                if (args.length > 0) {
+                    return args[args.length - 1]
+                }
             } else if (args[a.index]) {
                 return args[a.index]
             }
@@ -635,7 +683,7 @@ class Bot {
 
     /**
      *
-     * @param {Message} msg
+     * @param {CustomMessage} msg
      * @param {string} prefix
      * @returns {boolean}
      */

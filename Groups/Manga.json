@@ -194,6 +194,52 @@
           "name": "search"
         }
       ]
+    },
+    {
+      "gIds": "all",
+      "command": "مانجا",
+      "alies": [
+        "مانجا",
+        "manga"
+      ],
+      "type": "manga",
+      "response": "الأسم: *{mangaName}*\n\nالتقييم: {mangaRating}\nالتصنيف: {mangaGenre}\nالنوع: {mangaType}\nعدد الشباتر: {mangaChapters}\nالمؤلفين: {mangaAuthors}\nاحدث شابتر: {lastChapter}\n\nالوصف: {mangaDesc}\n",
+      "description": "معلومات عن مانجا معينه",
+      "failResponse": "خطأ فايجاد المانجا !",
+      "usage": "#جارفيس مانجا @اسم_المانجا",
+      "onlyAdmin": false,
+      "showInList": true,
+      "args": [
+        {
+          "index": "all",
+          "name": "mangaName"
+        }
+      ]
+    },
+    {
+      "gIds": "all",
+      "command": "شابتر",
+      "alies": [
+        "شابتر",
+        "chapter"
+      ],
+      "type": "manga",
+      "response": "تم",
+      "description": "رابط لقراء الشابتر",
+      "failResponse": "خطأ فايجاد الشابتر !",
+      "usage": "#جارفيس شابتر اسم_المانجا رقم_الشابتر",
+      "onlyAdmin": false,
+      "showInList": true,
+      "args": [
+        {
+          "index": "last",
+          "name": "chapter"
+        },
+        {
+          "index": "all-1",
+          "name": "mangaName"
+        }
+      ]
     }
   ],
   "hasForms": true,

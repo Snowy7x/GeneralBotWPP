@@ -6,7 +6,12 @@ import {Competitions} from "../Controllers/Competitions.js";
 // relative to the index.js file, not the Loader.js file
 let currFolder = path.resolve();
 if (!currFolder.endsWith("utils")) {
-    currFolder = path.join(currFolder, 'src', 'utils');
+    console.error('Loader.js must be in the utils folder!', currFolder);
+    if (currFolder.endsWith('src')) {
+        currFolder = path.join(currFolder, 'utils');
+    } else {
+        currFolder = path.join(currFolder, 'src', 'utils');
+    }
 }
 console.log(currFolder);
 if (!fs.existsSync(path.join(currFolder, '../../Groups'))) {
@@ -69,28 +74,28 @@ function Load(client = null) {
 
 /**
  *
- * @param {Message} msg
+ * @param {CustomMessage} msg
  * @returns {boolean}
  */
 function CanReply(msg) {
-    return ids.includes(msg.from);
+    return ids.includes(msg.key.remoteJid);
 }
 
 /**
  *
- * @param {Message} msg
+ * @param {CustomMessage} msg
  */
 function runAutoResponses(msg) {
-    for (let bot of bots) {
+    /*for (let bot of bots) {
         if (bot.canReply(msg)) {
             bot.runAutoResponses(msg);
         }
-    }
+    }*/
 }
 
 /**
  *
- * @param {Message} msg
+ * @param {CustomMessage} msg
  */
 function runCommands(msg) {
     // check if message starts with a prefix from the prefixes array
