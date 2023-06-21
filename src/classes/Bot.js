@@ -245,11 +245,14 @@ class Bot {
 
             let command = this.commands.find(c => c.alies.includes(commandName));
             let max = 0;
+
+            // try get a command with spaces
             while (!command && max < args.length) {
                 commandName += " " + args[max]
                 command = this.commands.find(c => c.alies.includes(commandName));
                 max++;
             }
+
             if (command) {
                 let gName = this.GetGroupCat(msg.from)
                 if (command.gIds === "all" || command.gIds.includes(msg.from) || command.gIds.includes(gName)) {

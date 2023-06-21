@@ -14,7 +14,7 @@ const com = new Competitions();
 
 /** @type {import("@whiskeysockets/baileys").WASocket}*/
 const client = makeWASocket({
-    logger: pino({level: 'warn'}),
+    logger: pino({level: 'silent'}),
     printQRInTerminal: true,
     auth: state,
     defaultQueryTimeoutMs: undefined,
@@ -69,6 +69,7 @@ client.ev.on("messages.upsert", async e => {
             return member.id === user
         })
         if (me) {
+            console.log(me)
             message.meAdmin = me.admin === "admin" || me.admin === "superadmin"
         }
 
@@ -117,6 +118,8 @@ client.ev.on("messages.upsert", async e => {
             quoted: message.originalMessage,
         })
     }
+
+    console.log("MeAdmin", message.meAdmin)
 
     com.onMessage(message)
 

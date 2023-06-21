@@ -14,7 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "@kazesolo/random-anime": "^1.0.0",
-    "@whiskeysockets/baileys": "^6.3.0",
+    "@whiskeysockets/baileys": "^6.0.0",
     "awse": "^1.4.6",
     "axios": "^1.4.0",
     "jimp": "^0.22.8",
