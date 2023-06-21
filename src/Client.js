@@ -30,10 +30,6 @@ client.ev.on("connection.update", async e => {
     if (e.isOnline) {
         console.log("Connected")
         // remove letter at the index
-        let user = client.user.id.split("")
-        user.splice(client.user.id.indexOf(":"), 2)
-        user = user.join("")
-        client.user.id = user
         console.log("Client ID: ", client.user.id)
         Loader.InitClient(client, com)
     }
@@ -65,7 +61,10 @@ client.ev.on("messages.upsert", async e => {
         let groupMetadata = await client.groupMetadata(message.key.remoteJid)
         message.groupMetadata = groupMetadata
         let me = groupMetadata.participants.find(member => {
-            let user = client.user.id;
+            let user = client.user.id.split("")
+            user.splice(client.user.id.indexOf(":"), 2)
+            user = user.join("")
+            console.log(member.id, user)
             return member.id === user
         })
         if (me) {

@@ -34,7 +34,6 @@ const IsAdmin = async (message) => {
 }
 
 async function Kick(message) {
-    console.log(message)
     if (!message.isGroup) return message.reply("هذا الأمر يعمل فقط في المجموعات")
     if (!message.meAdmin) return message.reply("أنا لست مشرفاً في هذه المجموعة")
     if (message.message?.extendedTextMessage?.contextInfo?.mentionedJid) {
