@@ -48,7 +48,12 @@ async function Kick(message) {
                 toKick.push(user.id)
             }
         })
-        await client.groupParticipantsUpdate(message.from, toKick, "remove")
+        console.log(toKick)
+        console.log(message.from)
+        await client.groupParticipantsUpdate(message.from, toKick, "remove").catch((e) => {
+            console.log(e)
+            message.reply("حدث خطأ أثناء طرد الكلب/الكلاب")
+        })
         return message.reply("خرج كلب/كلاب من المجموعة")
     }else{
         return message.reply("منشن الكلب/الكلاب الذين تريد طردهم")
