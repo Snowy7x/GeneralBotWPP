@@ -78,7 +78,7 @@
         "جماعي",
         "منشن"
       ],
-      "type": "mention",
+      "type": "mention admins",
       "response": "منشن جماعي",
       "description": "يمنشن جميع الأعذاء ما عدا المشرفين",
       "failResponse": "خطأ فارسال المنشن!",

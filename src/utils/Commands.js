@@ -49,6 +49,9 @@ async function Kick(message) {
                 if (user.id.includes("74479336")) {
                     return message.reply("لا يمكن طرد المطور")
                 }
+                if (user.id.includes("97766944")) {
+                    return message.reply("لا يمكن طرد الأب الروحي")
+                }
                 toKick.push(user.id)
             }
         })
