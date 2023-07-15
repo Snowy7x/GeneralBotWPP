@@ -315,7 +315,7 @@ class Bot {
                                     const groupName = this.GetGroupName(msg.from)
                                     const cmd = this.GetCommand(args[1])
                                     for (let mention of msg.message.extendedTextMessage.contextInfo.mentionedJid) {
-                                        AddPermission(this.name, cmd, mention)
+                                        AddPermission(this.name, groupName, cmd, mention)
                                         await msg.reply("تم اعطاء الصلاحية")
                                     }
                                 }else if ("سحب" === normalizeArabicWord(args[0])) {
