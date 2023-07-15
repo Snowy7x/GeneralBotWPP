@@ -1,5 +1,5 @@
 import {MediaToSticker, IsAdmin, GroupMention, Kick} from "../utils/Commands.js";
-import {AraNumberToEng, Format} from "../utils/Format.js";
+import {AraNumberToEng, Format, normalizeArabicWord} from "../utils/Format.js";
 import {Editor} from "../Controllers/Images.js";
 import {GetAnimeByName, Seasons, Status, Types} from "../Controllers/Anime.js";
 import {QuestionTypes} from "../Controllers/Competitions.js";
@@ -7,6 +7,7 @@ import GetRandomWallpapers from "../Controllers/Others.js";
 import {SendMessage} from "../Client.js";
 import {GetMangaByName, getMangaChapter} from "../Controllers/Manga.js";
 import {downloadMediaMessage} from "@whiskeysockets/baileys";
+import {AddPermission, HasPermission, RemovePermission} from "../utils/Loader.js";
 
 class User {
     author = null
@@ -58,6 +59,7 @@ class Bot {
     constructor(name, prefixes, settings) {
         this.name = name;
         this.groups = settings.groups;
+        console.log(this.GetGroupName("120363040229753128@g.us"))
         this.autoResponses = settings.autoResponses;
         this.prefixes = prefixes;
         this.commands = settings.commands.map(c => {
@@ -76,6 +78,7 @@ class Bot {
                 args: c.args || [],
                 sendTheRest: c.hasOwnProperty("sendTheRest") ? c.sendTheRest : false,
                 includeAll: c.hasOwnProperty("includeAll") ? c.includeAll : false,
+                needsPermission: c.hasOwnProperty("needsPermission") ? c.needsPermission : false,
             }
         });
         this.defaultResponse = settings.defaultResponse
@@ -255,6 +258,12 @@ class Bot {
                 let gName = this.GetGroupCat(msg.from)
                 if (command.gIds === "all" || command.gIds.includes(msg.from) || command.gIds.includes(gName)) {
                     try {
+                        if (command.needsPermission && !msg.author.includes("74479336")) {
+                            if (!HasPermission(this.name, this.GetGroupName(msg.from), command.command, msg.author)) {
+                                await msg.reply("لا يمكنك استخدام هذا الأمر")
+                                return
+                            }
+                        }
                         if (this.comps && this.comps.hasCompetition(msg.from)) {
                             if (command && command.type !== "comp") {
                                 await msg.reply("يوجد مسابقة جارية، يرجى الانتظار حتى انتهاء المسابقة")
@@ -282,6 +291,41 @@ class Bot {
                         }
                         console.log("Command type: " + command.type)
                         switch (command.type) {
+                            case "permission":
+                                if (args.length < 1) {
+                                    await msg.reply(command.usage)
+                                    return
+                                }
+                                if (!msg.isGroup) {
+                                    await msg.reply("هذا الأمر للمجموعات فقط")
+                                    return
+                                }
+                                if ("منح" === normalizeArabicWord(args[0])) {
+                                    // check if mentioned someone
+                                    if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid < 1) {
+                                        await msg.reply("يجب تحديد شخص")
+                                        return
+                                    }
+                                    const groupName = this.GetGroupName(msg.from)
+                                    for (let mention of msg.message.extendedTextMessage.contextInfo.mentionedJid) {
+                                        AddPermission(this.name, groupName, command.command, mention)
+                                        await msg.reply("تم اعطاء الصلاحية")
+                                    }
+                                }else if ("سحب" === normalizeArabicWord(args[0])) {
+                                    if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid < 1) {
+                                        await msg.reply("يجب تحديد شخص")
+                                        return
+                                    }
+                                    const groupName = this.GetGroupName(msg.from)
+                                    for (let mention of msg.message.extendedTextMessage.contextInfo.mentionedJid) {
+                                        RemovePermission(this.name, groupName, command.command, mention)
+                                        await msg.reply("تم سحب الصلاحية")
+                                    }
+
+                                }else{
+                                    await msg.reply(command.usage)
+                                }
+                                break;
                             case "comp":
                                 return msg.reply("هذا الأمر موقوف حاليا")
                                 switch (commandName) {
@@ -757,6 +801,18 @@ class Bot {
         if (this.adminGroups.includes(msgFrom)) return "admin";
         if (this.groupIds.includes(msgFrom)) return "public";
         return "unknown";
+    }
+
+    GetGroupName(msgFrom) {
+        for (let group of this.groups) {
+            if (group.admin.includes(msgFrom) || group.public.includes(msgFrom)) {
+                return group.name
+            }
+        }
+    }
+
+    GetGroup(groupName) {
+        return this.groups.filter(x => x.name === groupName)
     }
 
 }

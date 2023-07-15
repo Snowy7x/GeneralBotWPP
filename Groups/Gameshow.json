@@ -1,5 +1,5 @@
 {
-  "botName": "جارفيس",
+  "botName": "جارفيس1",
   "groups":
   {
     "snowy": {
@@ -74,6 +74,7 @@
       "failResponse": "خطأ فارسال المنشن!",
       "usage": "#جارفيس منشن جماعي",
       "onlyAdmin": true,
+      "needsPermission": true,
       "params": [
         {
           "alies": [
@@ -172,6 +173,22 @@
       "usage": "#جارفيس طرد @المنشن1 @المنشن2 ...",
       "onlyAdmin": true,
       "showInList": false
+    },
+    {
+      "gIds": "all",
+      "command": "صلاحية",
+      "alies": [
+        "صلاحيه",
+        "الصلاحية",
+        "الصلاحيه"
+      ],
+      "type": "permission",
+      "response": "",
+      "description": "منح أو سحب صلاحية",
+      "failResponse": "خطأ فمنح/سحب الصلاحية !",
+      "usage": "#جارفيس صلاحية منح/سحب @المنشن",
+      "onlyAdmin": true,
+      "showInList": true
     }
   ],
   "hasForms": true,

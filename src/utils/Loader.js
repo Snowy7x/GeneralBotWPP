@@ -67,6 +67,7 @@ function Load(client = null) {
         bots.push(bot);
         ids.push(...bot.getGroupsIds());
     });
+    LoadPermissions();
 
     console.log(`Loaded ${bots.length} bots`);
 }
@@ -125,10 +126,77 @@ function InitClient(client, competitions) {
     }
 }
 
+function LoadPermissions() {
+
+    // check if the permissions file exists
+    let permissions = null;
+    try {
+        permissions = fs.readFileSync(path.join(currFolder, '../../permissions.json'), 'utf8');
+    }catch (e) {
+        console.log('permissions.json file not found, creating one');
+    }
+    if (!permissions) {
+        // Create the permissions file
+
+        // Create empty data;
+        const data = {};
+        for (let bot of bots) {
+            data[bot.name] = {};
+            for (let group of bot.groups) {
+                data[bot.name][group.name] = {};
+                for (let command of bot.commands) {
+                    data[bot.name][group.name][command.command] = {};
+                }
+            }
+        }
+
+        fs.writeFileSync(path.join(currFolder, '../../permissions.json'), JSON.stringify(data, null, 2));
+    }else {
+        // Check if has all bots and groups
+        const data = JSON.parse(permissions);
+        for (let bot of bots) {
+            if (!data[bot.name]) {
+                data[bot.name] = {};
+            }
+            for (let group of bot.groups) {
+                if (!data[bot.name][group.name]) {
+                    data[bot.name][group.name] = {};
+                }
+                for (let command of bot.commands) {
+                    if (!data[bot.name][group.name][command.command]) {
+                        data[bot.name][group.name][command.command] = {};
+                    }
+                }
+            }
+        }
+    }
+}
+
+function HasPermission(botName, groupName, commandName, userId) {
+    const permissions = JSON.parse(fs.readFileSync(path.join(currFolder, '../../permissions.json'), 'utf8'));
+    return permissions[botName][groupName][commandName].hasOwnProperty(userId);
+}
+
+function AddPermission(botName, groupName, commandName, userId) {
+    const permissions = JSON.parse(fs.readFileSync(path.join(currFolder, '../../permissions.json'), 'utf8'));
+    permissions[botName][groupName][commandName][userId] = true;
+    fs.writeFileSync(path.join(currFolder, '../../permissions.json'), JSON.stringify(permissions, null, 2));
+}
+
+function RemovePermission(botName, groupName, commandName, userId) {
+    const permissions = JSON.parse(fs.readFileSync(path.join(currFolder, '../../permissions.json'), 'utf8'));
+    delete permissions[botName][groupName][commandName][userId];
+    fs.writeFileSync(path.join(currFolder, '../../permissions.json'), JSON.stringify(permissions, null, 2));
+}
+
 export {
     CanReply,
     runAutoResponses,
     runCommands,
     InitClient,
-    Load
+    Load,
+
+    HasPermission,
+    AddPermission,
+    RemovePermission
 }

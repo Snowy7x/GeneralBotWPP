@@ -84,6 +84,7 @@
       "failResponse": "خطأ فارسال المنشن!",
       "usage": "#جارفيس منشن جماعي",
       "onlyAdmin": true,
+      "needsPermission": true,
       "params": [
         {
           "alies": [
@@ -236,6 +237,22 @@
       "description": "أنهاء المسابقة",
       "failResponse": "خطأ فانهاء المسابقة !",
       "usage": "#جارفيس انهاء",
+      "onlyAdmin": true,
+      "showInList": true
+    },
+    {
+      "gIds": "all",
+      "command": "صلاحية",
+      "alies": [
+        "صلاحيه",
+        "الصلاحية",
+        "الصلاحيه"
+      ],
+      "type": "permission",
+      "response": "",
+      "description": "منح أو سحب صلاحية",
+      "failResponse": "خطأ فمنح/سحب الصلاحية !",
+      "usage": "#جارفيس صلاحية منح/سحب @المنشن",
       "onlyAdmin": true,
       "showInList": true
     },
