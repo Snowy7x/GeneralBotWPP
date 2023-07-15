@@ -179,7 +179,10 @@ function HasPermission(botName, groupName, commandName, userId) {
 
 function AddPermission(botName, groupName, commandName, userId) {
     const permissions = JSON.parse(fs.readFileSync(path.join(currFolder, '../../permissions.json'), 'utf8'));
-    permissions[botName][groupName][commandName][userId] = true;
+    permissions[botName][groupName][commandName] = {
+        ...permissions[botName][groupName][commandName],
+        [userId]: true
+    }
     fs.writeFileSync(path.join(currFolder, '../../permissions.json'), JSON.stringify(permissions, null, 2));
 }
 
