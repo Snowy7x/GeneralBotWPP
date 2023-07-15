@@ -254,7 +254,8 @@
       "failResponse": "خطأ فمنح/سحب الصلاحية !",
       "usage": "#جارفيس صلاحية منح/سحب @المنشن",
       "onlyAdmin": true,
-      "showInList": true
+      "showInList": true,
+      "needsPermission": true
     },
     {
       "gIds": "all",

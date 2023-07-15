@@ -300,6 +300,12 @@ class Bot {
                                     await msg.reply("هذا الأمر للمجموعات فقط")
                                     return
                                 }
+                                if (args.length < 2) {
+                                    await msg.reply("يجب تحديد الصلاحية")
+                                }
+                                if (args.length < 3) {
+                                    await msg.reply("يجب تحديد الشخص")
+                                }
                                 if ("منح" === normalizeArabicWord(args[0])) {
                                     // check if mentioned someone
                                     if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid < 1) {
@@ -307,8 +313,9 @@ class Bot {
                                         return
                                     }
                                     const groupName = this.GetGroupName(msg.from)
+                                    const cmd = this.GetCommand(args[1])
                                     for (let mention of msg.message.extendedTextMessage.contextInfo.mentionedJid) {
-                                        AddPermission(this.name, groupName, command.command, mention)
+                                        AddPermission(this.name, cmd, mention)
                                         await msg.reply("تم اعطاء الصلاحية")
                                     }
                                 }else if ("سحب" === normalizeArabicWord(args[0])) {
@@ -317,8 +324,9 @@ class Bot {
                                         return
                                     }
                                     const groupName = this.GetGroupName(msg.from)
+                                    const cmd = this.GetCommand(args[1])
                                     for (let mention of msg.message.extendedTextMessage.contextInfo.mentionedJid) {
-                                        RemovePermission(this.name, groupName, command.command, mention)
+                                        RemovePermission(this.name, groupName, cmd, mention)
                                         await msg.reply("تم سحب الصلاحية")
                                     }
 
@@ -809,6 +817,19 @@ class Bot {
                 return group.name
             }
         }
+    }
+
+    GetCommand(commandName) {
+        let cmd = this.commands.find(x => x.name === commandName)
+        if (cmd) return cmd;
+        cmd = this.commands.find(c => c.alies.includes(commandName));
+        let max = 0;
+        while (!cmd && max < args.length) {
+            commandName += " " + args[max]
+            cmd = this.commands.find(c => c.alies.includes(commandName));
+            max++;
+        }
+        return cmd;
     }
 
     GetGroup(groupName) {
