@@ -103,7 +103,6 @@ class Competition {
      * @param {CustomMessage} message
      */
     async onMessage(message) {
-        console.log(message.author + ": " + message.body)
         switch (this.type) {
             case QuestionTypes.TEXT:
                 if (isSimilarWord(message.body, this.currentExpectedAnswer)) {
@@ -114,7 +113,6 @@ class Competition {
                         p.points++;
                         this.participants.push(p);
                     }
-                    console.log("Correct answer!");
                     this.nextQuestion(message);
                 }
         }
@@ -129,10 +127,10 @@ class Competition {
         let text = "";
         let isReply = false
         if (message) {
-            text = ("هنا\nالسؤال رقم " + (this.currentQuestion + 1) + " من " + this.maxQuestions);
+            text = ("هنا\nالسؤال رقم " + (this.currentQuestion) + " من " + this.maxQuestions);
             isReply = true
         }
-        else text = "السؤال رقم " + (this.currentQuestion + 1) + " من " + this.maxQuestions
+        else text = "السؤال رقم " + (this.currentQuestion) + " من " + this.maxQuestions
         switch (this.type) {
             case QuestionTypes.TEXT:
                 let q = this.question[Math.floor(Math.random() * this.question.length)];
