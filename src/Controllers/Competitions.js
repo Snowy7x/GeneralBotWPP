@@ -96,7 +96,23 @@ class Competition {
     }
 
     start() {
-        this.nextQuestion(null);
+        this.currentQuestion = 1;
+        let text = "السؤال رقم " + (this.currentQuestion) + " من " + this.maxQuestions
+        switch (this.type) {
+            case QuestionTypes.TEXT:
+                let q = this.question[Math.floor(Math.random() * this.question.length)];
+                while (this.usedQuestions.includes(q) || q.length <= 1) {
+                    q = this.question[Math.floor(Math.random() * this.question.length)];
+                }
+
+                // remove the question from the list:
+                this.question.splice(this.question.indexOf(q), 1);
+                this.usedQuestions.push(q);
+                this.currentExpectedAnswer = q;
+                text += `\n\n*${q}*`;
+                break;
+        }
+        SendMessage(this.group, text);
     }
 
     /**
