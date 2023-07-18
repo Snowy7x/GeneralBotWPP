@@ -125,9 +125,14 @@ class Competition {
             await this.finish();
             return;
         }
-        if (message) await message.reply("هنا\nالسؤال رقم " + (this.currentQuestion + 1)+ " من " + this.maxQuestions);
-        else await SendMessage(this.group, "السؤال رقم " + (this.currentQuestion + 1) + " من " + this.maxQuestions);
         this.currentQuestion++;
+        let text = "";
+        let isReply = false
+        if (message) {
+            text = ("هنا\nالسؤال رقم " + (this.currentQuestion + 1) + " من " + this.maxQuestions);
+            isReply = true
+        }
+        else text = "السؤال رقم " + (this.currentQuestion + 1) + " من " + this.maxQuestions
         switch (this.type) {
             case QuestionTypes.TEXT:
                 let q = this.question[Math.floor(Math.random() * this.question.length)];
@@ -139,8 +144,14 @@ class Competition {
                 this.question.splice(this.question.indexOf(q), 1);
                 this.usedQuestions.push(q);
                 this.currentExpectedAnswer = q;
-                await SendMessage(this.group, `*${q}*`);
+                text += `\n\n*${q}*`;
                 break;
+        }
+
+        if (isReply) {
+            await message.reply(text);
+        }else{
+            await SendMessage(this.group, text);
         }
     }
 
