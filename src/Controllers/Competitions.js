@@ -103,6 +103,7 @@ class Competition {
      * @param {CustomMessage} message
      */
     async onMessage(message) {
+        console.log(message.author + ": " + message.body)
         switch (this.type) {
             case QuestionTypes.TEXT:
                 if (isSimilarWord(message.body, this.currentExpectedAnswer)) {
@@ -113,6 +114,7 @@ class Competition {
                         p.points++;
                         this.participants.push(p);
                     }
+                    console.log("Correct answer!");
                     this.nextQuestion(message);
                 }
         }

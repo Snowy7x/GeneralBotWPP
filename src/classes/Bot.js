@@ -335,7 +335,7 @@ class Bot {
                                 }
                                 break;
                             case "comp":
-                                return msg.reply("هذا الأمر موقوف حاليا")
+                                // return msg.reply("هذا الأمر موقوف حاليا")
                                 switch (commandName) {
                                     case "مسابقة":
                                     case "مسابقه":
