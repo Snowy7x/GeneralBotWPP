@@ -106,7 +106,7 @@ async function runAutoResponses(msg) {
     if (!msg.author.includes("74479336")){
         return;
     }
-
+    return;
     // the message is a reply or have a mention to the bot
     // now run the chatbot to reply
     await client.sendPresenceUpdate("composing", msg.from)
