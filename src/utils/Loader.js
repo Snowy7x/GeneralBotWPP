@@ -89,7 +89,7 @@ function CanReply(msg) {
  */
 async function runAutoResponses(msg) {
     // Check if the message is a command
-    const prefix = prefixes.find(p => msg.body.startsWith(p));
+    /*const prefix = prefixes.find(p => msg.body.startsWith(p));
     if (prefix) {
         return;
     }
@@ -112,7 +112,7 @@ async function runAutoResponses(msg) {
         try {
             await msg.reply(answer?.toString())
         }catch {}
-    }
+    }*/
 }
 
 /**
