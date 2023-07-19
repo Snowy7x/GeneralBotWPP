@@ -87,6 +87,7 @@ function CanReply(msg) {
  * @param {CustomMessage} msg
  */
 async function runAutoResponses(msg) {
+    return
     // Check if the message is a command
     const prefix = prefixes.find(p => msg.body.startsWith(p));
     if (prefix) {

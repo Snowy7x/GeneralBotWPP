@@ -1,6 +1,14 @@
-import Bard, { askAI } from "bard-ai";
+import CharacterAI from 'node_characterai';
+const characterAI = new CharacterAI();
 
-await Bard.init("YgglpsO7Tk3rbswYjGJqTPu0lFlzbS0xnhyXMOIUytN90PKXiXr8Sil6HytrhbPJSjKAJg.");
+(async() => {
+    await characterAI.authenticateAsGuest();
 
-const newConversation = new Bard.Chat()
-const re = await newConversation.ask("In this conversation You are pretending to be 'Snowy', a guy who is interested in anime, you talk friendly and chats about anime only. answer with short straight to the point answers only and always pretend to be snowy not bard.")
+    const characterId = "8_1NyR8w1dOXmI1uWaieQcd147hecbdIK7CeEAIrdJw" // Discord moderator
+
+    const chat = await characterAI.createOrContinueChat(characterId);
+    const response = await chat.sendAndAwaitResponse('Hello discord mod!', true)
+
+    console.log(response);
+    // use response.text to use it in a string.
+})();
