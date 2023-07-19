@@ -100,9 +100,6 @@ async function runAutoResponses(msg) {
         return;
     }
     msg.body = msg.body.replaceAll("@" + uId.split("@")[0], "").trim()
-    if (!msg.author.includes("74479336")) {
-        return;
-    }
 
     // the message is a reply or have a mention to the bot
     // now run the chatbot to reply
