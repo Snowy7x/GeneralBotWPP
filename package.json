@@ -19,6 +19,7 @@
     "axios": "^1.4.0",
     "bard-ai": "^1.5.4",
     "jimp": "^0.22.8",
+    "node_characterai": "^1.1.8",
     "pino": "^8.14.1",
     "qrcode-terminal": "^0.12.0",
     "wa-sticker-formatter": "^4.4.4"
