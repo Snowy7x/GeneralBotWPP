@@ -1,9 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import Bot from "../classes/Bot.js";
-import {Competitions} from "../Controllers/Competitions.js";
 import client from "../Client.js";
-import chatBotController from "../Controllers/ChatBotController.js";
 
 // relative to the index.js file, not the Loader.js file
 let currFolder = path.resolve();
@@ -29,7 +27,6 @@ const ids = [];
 const bots = []
 
 Load();
-
 
 function Load(client = null) {
     groups.forEach(group => {
@@ -74,6 +71,8 @@ function Load(client = null) {
     console.log(`Loaded ${bots.length} bots`);
 }
 
+import chatBotController from "../Controllers/ChatBotController.js";
+
 /**
  *
  * @param {CustomMessage} msg
@@ -89,30 +88,34 @@ function CanReply(msg) {
  */
 async function runAutoResponses(msg) {
     // Check if the message is a command
-    /*const prefix = prefixes.find(p => msg.body.startsWith(p));
+    const prefix = prefixes.find(p => msg.body.startsWith(p));
     if (prefix) {
         return;
     }
 
     // Check if the message is a reply or have a mention to the bot
-    const {quotedMessage} = msg.message?.['extendedTextMessage']?.contextInfo
+    const {quotedMessage} = msg.message?.extendedTextMessage?.contextInfo || {};
     if (!quotedMessage) {
-        const mentions = msg.message.extendedTextMessage.contextInfo.mentionedJid
+        const mentions = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid
         if (!mentions || !mentions.includes(client.user.id) || mentions.length > 1) {
             return;
         }
     }
 
-    if (!msg.author.includes("74479336")) return;
+    if (!msg.author.includes("74479336")){
+        return;
+    }
 
     // the message is a reply or have a mention to the bot
     // now run the chatbot to reply
+    await client.sendPresenceUpdate("composing", msg.from)
     const answer = await chatBotController(msg.body)
     if (answer) {
         try {
             await msg.reply(answer?.toString())
+            await client.sendPresenceUpdate("available", msg.from)
         }catch {}
-    }*/
+    }
 }
 
 /**
