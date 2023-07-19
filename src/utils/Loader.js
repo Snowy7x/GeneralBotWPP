@@ -97,11 +97,12 @@ async function runAutoResponses(msg) {
     const {quotedMessage} = msg.message?.extendedTextMessage?.contextInfo || {};
     if (!quotedMessage) {
         const mentions = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid
-        if (!mentions || !mentions.includes(client.user.id) || mentions.length > 1) {
+        let uId = client.user.id.split(":")[0] + "@s.whatsapp.net"
+        if (!mentions || !mentions.includes(uId) || mentions.length > 1) {
             return;
         }
+        msg.body = msg.body.replaceAll("@" + uId.split("@")[0], "").trim()
     }
-
     if (!msg.author.includes("74479336")){
         return;
     }
