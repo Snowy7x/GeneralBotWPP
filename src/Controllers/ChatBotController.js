@@ -1,3 +1,4 @@
+/*
 import CharacterAI from 'node_characterai';
 const characterAI = new CharacterAI();
 
@@ -8,10 +9,11 @@ characterAI.authenticateAsGuest().then(() => {
         chat = c;
     });
 });
+*/
 
 
 async function bardChat(msg) {
-    return await chat.sendAndAwaitResponse(msg, true);
+    //return await chat.sendAndAwaitResponse(msg, true);
 }
 
 export default bardChat

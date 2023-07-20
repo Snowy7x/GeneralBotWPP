@@ -87,24 +87,23 @@ function CanReply(msg) {
  * @param {CustomMessage} msg
  */
 async function runAutoResponses(msg) {
-    return
     // Check if the message is a command
-    const prefix = prefixes.find(p => msg.body.startsWith(p));
+    /*const prefix = prefixes.find(p => msg.body.startsWith(p));
     if (prefix) {
         return;
-    }
+    }*/
 
     // Check if the message is a reply or have a mention to the bot
-    const mentions = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid
+    /*const mentions = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid
     let uId = client.user.id.split(":")[0] + "@s.whatsapp.net"
     if (!mentions || !mentions.includes(uId) || mentions.length > 1) {
         return;
     }
-    msg.body = msg.body.replaceAll("@" + uId.split("@")[0], "").trim()
+    msg.body = msg.body.replaceAll("@" + uId.split("@")[0], "").trim()*/
 
     // the message is a reply or have a mention to the bot
     // now run the chatbot to reply
-    await client.sendPresenceUpdate("composing", msg.from)
+    /*await client.sendPresenceUpdate("composing", msg.from)
     const answer = await chatBotController(msg.body)
     if (answer) {
         try {
@@ -112,7 +111,7 @@ async function runAutoResponses(msg) {
             await client.sendPresenceUpdate("available", msg.from)
         } catch {
         }
-    }
+    }*/
 }
 
 /**
