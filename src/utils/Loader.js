@@ -195,9 +195,10 @@ async function runNews(msg, news) {
             }else if (msg.mediaType === "image") {
                 options.image = media;
             }
-
+            console.log(target, options)
             await SendMessage(target, options);
         }else {
+            console.log(target, content)
             await SendMessage(target, {
                 text: content,
             });
