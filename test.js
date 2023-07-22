@@ -1,14 +1,25 @@
-import CharacterAI from 'node_characterai';
-const characterAI = new CharacterAI();
+/*
+import smartestchatbot  from 'smartestchatbot';
 
-(async() => {
-    await characterAI.authenticateAsGuest();
+const client = new smartestchatbot.Client("MTAxOTY4MTk5MDY2NTg3MTM2.nwssuc.AnRPDvG8KBMRDh8AlqIVKzOqAdo");
 
-    const characterId = "8_1NyR8w1dOXmI1uWaieQcd147hecbdIK7CeEAIrdJw" // Discord moderator
+client.chat({message:"Do you know anime naruto?", name:"SmartestChatbot", owner:"Snowy", user: "Islam"}, "ar").then(reply => {
+console.log(reply);
+// The module will reply based on the message!
+});*/
 
-    const chat = await characterAI.createOrContinueChat(characterId);
-    const response = await chat.sendAndAwaitResponse('Hello discord mod!', true)
+import fs from "fs";
 
-    console.log(response);
-    // use response.text to use it in a string.
-})();
+const forms = {
+    episode: `─━── 「حلقة」─━── 
+{content}
+‏─━─「⊱𝑨𝒊𝒓𝒆𝒔 𖡹 𝑵𝒆𝒘𝒔📬」─━─
+اللقب :|-جارفيس
+`,
+    news: `─━── 「خبر」─━── 
+{content}
+‏─━─「⊱𝑨𝒊𝒓𝒆𝒔 𖡹 𝑵𝒆𝒘𝒔📬」─━─
+اللقب :|-جارفيس`
+}
+
+fs.writeFileSync("./forms.json", JSON.stringify(forms, null, 4))

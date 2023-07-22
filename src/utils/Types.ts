@@ -10,7 +10,9 @@ interface CustomMessage extends WAMessage {
     hasText: boolean,
     meAdmin: boolean,
     media: proto.Message.IImageMessage | proto.Message.IVideoMessage,
+    mediaType: string,
     body: string,
+    ogBody: string,
     groupMetadata?: GroupMetadata,
     author?: string,
     from: string,
@@ -145,9 +147,4 @@ interface CustomMessage extends WAMessage {
     /** WebMessageInfo revokeMessageTimestamp */
     revokeMessageTimestamp?: (number|Long|null);
 
-    /** WebMessageInfo pinInChat */
-    pinInChat?: (proto.IPinInChat|null);
-
-    /** WebMessageInfo futureproofMessageSecretMessage */
-    futureproofMessageSecretMessage?: (proto.IFutureproofMessageSecretMessage|null);
 }

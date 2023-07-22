@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import Bot from "../classes/Bot.js";
-import client from "../Client.js";
+import client, {SendMessage} from "../Client.js";
 
 // relative to the index.js file, not the Loader.js file
 let currFolder = path.resolve();
@@ -22,6 +22,7 @@ const groupsFolder = path.join(currFolder, '../../Groups');
 const groups = fs.readdirSync(groupsFolder).filter(file => file.endsWith('.json'));
 const prefixes = [];
 const ids = [];
+const newsMap = []
 
 // Prepare all the groups with their respective data
 const bots = []
@@ -33,6 +34,17 @@ function Load(client = null) {
         /// old require: const groupData = require(path.join(groupsFolder, group));
         /// new import:
         const groupData = JSON.parse(fs.readFileSync(path.join(groupsFolder, group), 'utf8'));
+        // Create the news map
+        if (groupData.hasOwnProperty("newsSources") && groupData.hasOwnProperty("newsTarget")  && groupData.hasOwnProperty("newsForms")) {
+            newsMap.push({
+                sources: groupData.newsSources,
+                targets: groupData.newsTarget,
+                forms: groupData.newsForms,
+                from: groupData.hasOwnProperty("newsFromIncludes") ? groupData.newsFromIncludes : null,
+            })
+        }
+
+        // Create the bot
         const autoResponses = groupData.autoResponses;
         const commands = groupData.commands;
         prefixes.push(...groupData.commandPrefixes)
@@ -72,6 +84,7 @@ function Load(client = null) {
 }
 
 import chatBotController from "../Controllers/ChatBotController.js";
+import {downloadMediaMessage, proto} from "@whiskeysockets/baileys";
 
 /**
  *
@@ -139,6 +152,74 @@ function runCommands(msg) {
         }
     }
 
+}
+
+
+/**
+ *
+ * @param {CustomMessage} msg
+ * @param {Object} news
+ */
+async function runNews(msg, news) {
+    // content of the message
+    if (news.from && news.from.length > 0) {
+        let isOk = false;
+        for (let from of news.from) {
+            if (msg.author.includes(from)) {
+                isOk = true;
+                break;
+            }
+        }
+        if (!isOk) return;
+    }
+
+    const forbiddenWords = ["مانجا", "مانهوا", "مانها", "قراءة ممتعة", "chapter", "manga"];
+    if (forbiddenWords.some(w => msg.ogBody.toLowerCase().includes(w))) return;
+    let form = msg.ogBody.includes("مشاهده ممتعه") || msg.ogBody.includes("مشاهدة ممتعة") ? news.forms["episode"] : news.forms["news"];
+    let content = form.replace("{content}", msg.ogBody);
+
+    let media = null;
+    if (msg.hasMedia) {
+        media = await downloadMediaMessage(msg.originalMessage, "buffer", {})
+    }
+
+    // send the message to the target groups
+    for (let target of news.targets) {
+        if (target === msg.from) continue;
+        if (media) {
+            const options = {
+                caption: content,
+            }
+            if (msg.mediaType === "video") {
+                options.video = media;
+            }else if (msg.mediaType === "image") {
+                options.image = media;
+            }
+
+            await SendMessage(target, options);
+        }else {
+            await SendMessage(target, {
+                text: content,
+            });
+        }
+    }
+}
+
+/**
+ *
+ * @param {CustomMessage} msg
+ */
+function Run(msg) {
+    if (CanReply(msg)) {
+        runAutoResponses(msg);
+        runCommands(msg);
+    }else {
+        for (let news of newsMap) {
+            if (news.sources.includes(msg.from)) {
+                runNews(msg, news);
+            }
+        }
+    }
 }
 
 function InitClient(client, competitions) {
@@ -215,8 +296,7 @@ function RemovePermission(botName, groupName, commandName, userId) {
 
 export {
     CanReply,
-    runAutoResponses,
-    runCommands,
+    Run,
     InitClient,
     Load,
 

@@ -52,7 +52,7 @@ client.ev.on("messages.upsert", async e => {
     message.originalMessage = ogMessage
     message.isGroup = message.key.remoteJid.endsWith("@g.us")
     message.groupMetadata = null
-    message.body = ""
+    message.ogBody = ""
     message.from = message.key.remoteJid
     message.author = message.isGroup ? message.key.participant : message.key.remoteJid
     message.meAdmin = false
@@ -76,34 +76,39 @@ client.ev.on("messages.upsert", async e => {
         })
         if (p) {
             message.isGroupAdmin = p.admin === "admin" || p.admin === "superadmin"
-        }else {
+        } else {
             message.isGroupAdmin = false
         }
-    }else {
+    } else {
         message.isGroupAdmin = true
     }
 
     if (message.message.hasOwnProperty("viewOnceMessageV2")) {
         message.message = message.message.viewOnceMessageV2.message
         message.isViewOnce = true
-    }else {
+    } else {
         message.isViewOnce = false
     }
 
     message.hasMedia = message.message.hasOwnProperty("imageMessage") || message.message.hasOwnProperty("videoMessage")
     if (message.hasMedia) {
+        if (message.message.imageMessage) {
+            message.mediaType = "image"
+        }else if (message.message.videoMessage) {
+            message.mediaType = "video"
+        }
         message.media = message.message.imageMessage ?? message.message.videoMessage
         if (message.media.caption) {
-            message.body = message.media.caption
+            message.ogBody = message.media.caption
         }
     }
 
     message.hasText = message.message.hasOwnProperty("conversation") || message.message.hasOwnProperty("extendedTextMessage")
     if (message.hasText) {
-        message.body = message.message?.conversation || message.message.extendedTextMessage.text
+        message.ogBody = message.message?.conversation || message.message.extendedTextMessage.text
     }
 
-    message.body = normalizeArabicWord(message.body)
+    message.body = normalizeArabicWord(message.ogBody)
 
 
     message.reply = async (content) => {
@@ -130,10 +135,8 @@ client.ev.on("messages.upsert", async e => {
         }
     }
 
-    if (Loader.CanReply(message)) {
-        Loader.runAutoResponses(message);
-        Loader.runCommands(message);
-    }
+    Loader.Run(message)
+
 })
 
 /**
