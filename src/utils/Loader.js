@@ -84,7 +84,7 @@ function Load(client = null) {
 }
 
 import chatBotController from "../Controllers/ChatBotController.js";
-import {downloadMediaMessage, proto} from "@whiskeysockets/baileys";
+import {downloadMediaMessage} from "@whiskeysockets/baileys";
 
 /**
  *
