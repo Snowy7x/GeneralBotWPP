@@ -173,7 +173,7 @@ async function runNews(msg, news) {
         if (!isOk) return;
     }
 
-    const forbiddenWords = ["مانجا", "مانهوا", "مانها", "قراءة ممتعة", "chapter", "manga"];
+    const forbiddenWords = ["مانجا", "مانهوا", "مانها", "قراءة ممتعة", "chapter", "manga", "game", "لعبة", "لعبه"];
     if (forbiddenWords.some(w => msg.ogBody.toLowerCase().includes(w))) return;
     let form = msg.ogBody.includes("مشاهده ممتعه") || msg.ogBody.includes("مشاهدة ممتعة") ? news.forms["episode"] : news.forms["news"];
     let content = form.replace("{content}", msg.ogBody);
