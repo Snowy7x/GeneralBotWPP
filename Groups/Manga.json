@@ -258,6 +258,46 @@
       "onlyAdmin": true,
       "showInList": true,
       "needsPermission": true
+    },
+    {
+      "gIds": "all",
+      "command": "مسابقة",
+      "alies": [
+        "مسابقة",
+        "مسابقه"
+      ],
+      "type": "comp",
+      "response": "",
+      "description": "بدأ مسابقة",
+      "failResponse": "خطأ فبدأ المسابقة !",
+      "usage": "#جارفيس مسابقة @النوع @عدد_الأسألة",
+      "onlyAdmin": true,
+      "showInList": true,
+      "args": [
+        {
+          "index": 0,
+          "name": "type"
+        },
+        {
+          "index": 1,
+          "name": "questions"
+        }
+      ]
+    },
+    {
+      "gIds": "all",
+      "command": "انهاء",
+      "alies": [
+        "انهي",
+        "انهاء"
+      ],
+      "type": "comp",
+      "response": "",
+      "description": "أنهاء المسابقة",
+      "failResponse": "خطأ فانهاء المسابقة !",
+      "usage": "#جارفيس انهاء",
+      "onlyAdmin": true,
+      "showInList": true
     }
   ],
   "hasForms": true,
