@@ -1,4 +1,4 @@
-import {AnimeCharacterNames, CharacterNames} from "./Anime.js";
+import {CharacterNames} from "./Anime.js";
 import client, {SendMessage} from "../Client.js";
 import {isSimilarWord} from "../utils/Format.js";
 import fs from "fs";
