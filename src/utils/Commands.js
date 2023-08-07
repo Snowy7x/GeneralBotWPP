@@ -41,7 +41,6 @@ async function Kick(message) {
     if (!message.isGroup) return message.reply("هذا الأمر يعمل فقط في المجموعات")
     if (!message.meAdmin) return message.reply("أنا لست مشرفاً في هذه المجموعة")
     if (message.message?.extendedTextMessage?.contextInfo?.mentionedJid) {
-        console.log(message.message.extendedTextMessage.contextInfo.mentionedJid)
         let toKick = []
         let participants = message.message.extendedTextMessage.contextInfo.mentionedJid
         message.groupMetadata.participants.forEach((user) => {
@@ -57,10 +56,7 @@ async function Kick(message) {
         })
         // remove the duplicate ids
         toKick = [...new Set(toKick)]
-        console.log("toKick", toKick)
-        console.log(message.from)
         return await client.groupParticipantsUpdate(message.from, toKick, "remove").catch((e) => {
-            console.log(e)
             message.reply("حدث خطأ أثناء طرد الكلب/الكلاب")
         }).then(() => {
             return message.reply("خرج كلب/كلاب من المجموعة")
@@ -79,7 +75,6 @@ async function Kick(message) {
  * @constructor
  */
 async function GroupMention(msg, client = null, includeAdmins = false) {
-    console.log(includeAdmins) // (user.admin === "admin" || user.admin === "superadmin")
     const mentions = msg.groupMetadata.participants.filter((user) => {
         if (!includeAdmins) {
             return user.admin !== "admin" && user.admin !== "superadmin" && user.id !== msg.key.remoteJid

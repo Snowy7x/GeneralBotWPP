@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@adiwajshing/keyed-db": "^0.2.4",
     "@kazesolo/random-anime": "^1.0.0",
     "@whiskeysockets/baileys": "^6.0.0",
     "awse": "^1.4.6",

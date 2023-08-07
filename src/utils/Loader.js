@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import Bot from "../classes/Bot.js";
-import client, {SendMessage} from "../Client.js";
+import client, {CreateMessage, SendMessage, Store} from "../Client.js";
 
 // relative to the index.js file, not the Loader.js file
 let currFolder = path.resolve();
@@ -37,8 +37,10 @@ function Load(client = null) {
         // Create the news map
         if (groupData.hasOwnProperty("newsSources") && groupData.hasOwnProperty("newsTarget")  && groupData.hasOwnProperty("newsForms")) {
             newsMap.push({
+                name: groupData.botName.toString(),
                 sources: groupData.newsSources,
                 targets: groupData.newsTarget,
+                finalTargets: groupData?.newsFinalTarget || [],
                 forms: groupData.newsForms,
                 from: groupData.hasOwnProperty("newsFromIncludes") ? groupData.newsFromIncludes : null,
             })
@@ -72,6 +74,7 @@ function Load(client = null) {
             formsCommand: groupData.formsCommand,
             forms: groupData.forms,
             sheets: groupData.sheets,
+            cat: groupData.cat,
         });
 
         bot.client = client;
@@ -173,6 +176,8 @@ async function runNews(msg, news) {
         if (!isOk) return;
     }
 
+    if (msg.body < 2) return;
+
     const forbiddenWords = ["مانجا", "مانهوا", "مانها", "قراءة ممتعة", "chapter", "manga", "game", "لعبة", "لعبه"];
     if (forbiddenWords.some(w => msg.ogBody.toLowerCase().includes(w))) return;
     let form = msg.ogBody.includes("مشاهده ممتعه") || msg.ogBody.includes("مشاهدة ممتعة") ? news.forms["episode"] : news.forms["news"];
@@ -183,8 +188,121 @@ async function runNews(msg, news) {
         media = await downloadMediaMessage(msg.originalMessage, "buffer", {})
     }
 
+    let sentMsg = null;
+
     // send the message to the target groups
     for (let target of news.targets) {
+        // if (target === msg.from) continue;
+        if (media) {
+            const options = {
+                caption: content,
+            }
+            if (msg.mediaType === "video") {
+                options.video = media;
+            }else if (msg.mediaType === "image") {
+                options.image = media;
+            }
+            sentMsg = await SendMessage(target, options);
+        }else {
+            sentMsg = await SendMessage(target, {
+                text: content,
+            });
+        }
+    }
+
+    // check if folder exists
+    if (!fs.existsSync(path.join(currFolder, "../Data"))) {
+        fs.mkdirSync(path.join(currFolder, "../Data"));
+    }
+
+    // check if file exists
+    if (!fs.existsSync(path.join(currFolder, "../Data/news.json"))) {
+        fs.writeFileSync(path.join(currFolder, "../Data/news.json"), "{}");
+    }
+
+    // save the message to the news.json file
+    fs.readFile(path.join(currFolder, "../Data/news.json"), "utf8", (err, data) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        let newsMap = JSON.parse(data);
+        newsMap.push({
+            msgId: sentMsg.key.id,
+            name: news.name,
+            from: msg.author,
+        });
+
+        fs.writeFile(path.join(currFolder, "../Data/news.json"), JSON.stringify(newsMap), (err) => {
+            if (err) {
+                console.error(err);
+            }
+        });
+    });
+}
+
+/**
+ * @param {CustomMessage} message
+ * @return {Promise<void>}
+ * @constructor
+ */
+async function TryLoadNewsMsg(message) {
+    // check if folder exists
+    if (!fs.existsSync(path.join(currFolder, "../Data"))) {
+        fs.mkdirSync(path.join(currFolder, "../Data"));
+    }
+
+    // check if file exists
+    if (!fs.existsSync(path.join(currFolder, "../Data/news.json"))) {
+        fs.writeFileSync(path.join(currFolder, "../Data/news.json"), "[]");
+    }
+
+    // read all the loaded news
+    fs.readFile(path.join(currFolder, "../Data/news.json"), "utf8", async (err, data) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        let newsList = JSON.parse(data);
+        // Check if the message is already loaded
+        let msg = newsList.find(n => n.msgId === message.key.id);
+        if (!msg) return;
+
+
+        // Get the news
+        let news = newsMap.find(n => n.name === msg.name);
+        if (!news) return;
+        // forward the message
+        for (let target of news.finalTargets) {
+            await SendMessage(target, {
+                forward: message.originalMessage,
+            })
+        }
+
+        // remove the message from the news.json file
+        newsList = newsList.filter(n => n.msgId !== message.key.id);
+        fs.writeFile(path.join(currFolder, "../Data/news.json"), JSON.stringify(newsList), (err) => {
+            if (err) {
+                console.error(err);
+            }
+        })
+    });
+    // Check if the message is already loaded
+
+    // Get the news
+    /*let news = newsMap.find(n => n.name === msg.news);
+    if (!news) return;
+
+    // Resend the same message to the target groups
+    let content = msg.body;
+    let media = null;
+    if (msg.hasMedia) {
+        media = await downloadMediaMessage(msg.originalMessage, "buffer", {})
+    }
+
+    for (let target of news.finalTargets) {
         if (target === msg.from) continue;
         if (media) {
             const options = {
@@ -203,21 +321,22 @@ async function runNews(msg, news) {
                 text: content,
             });
         }
-    }
+    }*/
 }
+
 
 /**
  *
  * @param {CustomMessage} msg
  */
-function Run(msg) {
+async function Run(msg) {
     if (CanReply(msg)) {
-        runAutoResponses(msg);
+        await runAutoResponses(msg);
         runCommands(msg);
-    }else {
+    } else {
         for (let news of newsMap) {
             if (news.sources.includes(msg.from)) {
-                runNews(msg, news);
+                await runNews(msg, news);
             }
         }
     }
@@ -299,6 +418,7 @@ export {
     CanReply,
     Run,
     InitClient,
+    TryLoadNewsMsg,
     Load,
 
     HasPermission,

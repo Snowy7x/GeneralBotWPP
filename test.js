@@ -1,25 +1,21 @@
-/*
-import smartestchatbot  from 'smartestchatbot';
-
-const client = new smartestchatbot.Client("MTAxOTY4MTk5MDY2NTg3MTM2.nwssuc.AnRPDvG8KBMRDh8AlqIVKzOqAdo");
-
-client.chat({message:"Do you know anime naruto?", name:"SmartestChatbot", owner:"Snowy", user: "Islam"}, "ar").then(reply => {
-console.log(reply);
-// The module will reply based on the message!
-});*/
-
+import axios from "axios";
 import fs from "fs";
 
-const forms = {
-    episode: `─━── 「حلقة」─━── 
-{content}
-‏─━─「⊱𝑨𝒊𝒓𝒆𝒔 𖡹 𝑵𝒆𝒘𝒔📬」─━─
-اللقب :|-جارفيس
-`,
-    news: `─━── 「خبر」─━── 
-{content}
-‏─━─「⊱𝑨𝒊𝒓𝒆𝒔 𖡹 𝑵𝒆𝒘𝒔📬」─━─
-اللقب :|-جارفيس`
-}
+const formData = new FormData();
+let imagePath = "./R.jpg";
 
-fs.writeFileSync("./forms.json", JSON.stringify(forms, null, 4))
+// convert local image to buffer
+let base64 = fs.readFileSync(imagePath, {encoding: 'base64'});
+let buffer = Buffer.from(base64, 'base64');
+
+let imageBlob = new Blob([buffer], {type: "image/jpeg"});
+
+formData.append("image", imageBlob);
+
+axios.post("https://api.trace.moe/search", {
+    body: formData
+}).then(r => {
+    console.log(r);
+}).catch(e => {
+    console.log(e);
+})

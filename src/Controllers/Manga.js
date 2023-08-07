@@ -103,7 +103,6 @@ const getMangaChapter = async (mangaName, chapter) => {
         message: "Unexpected error",
     };
     await GetMangaByName(mangaName).then(async r => {
-        console.log(r)
         if (r == null || r === "") {
             result.code = 404;
             result.message = "ما لقيت المانجا باللسته عندي (جرب تكتب الاسم بالانجليزي او الياباني)!!"

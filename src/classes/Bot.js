@@ -49,6 +49,7 @@ class Bot {
      */
     comps = null
     users = []
+    cat = "anime"
 
     /**
      *
@@ -59,7 +60,6 @@ class Bot {
     constructor(name, prefixes, settings) {
         this.name = name;
         this.groups = settings.groups;
-        console.log(this.GetGroupName("120363040229753128@g.us"))
         this.autoResponses = settings.autoResponses;
         this.prefixes = prefixes;
         this.commands = settings.commands.map(c => {
@@ -85,6 +85,7 @@ class Bot {
         this.publicGroups = this.groups.filter(g => g.public !== "").map(g => g.public);
         this.adminGroups = this.groups.filter(g => g.admin !== "").map(g => g.admin);
         this.groupIds = [...this.publicGroups, ...this.adminGroups];
+        this.cat = settings.cat || "anime"
 
         if (settings.hasForms) {
             this.forms = settings.forms;
@@ -289,7 +290,6 @@ class Bot {
                             let user = this.users.find(u => u.author === msg.from)
                             user.setLastCmd(command)
                         }
-                        console.log("Command type: " + command.type)
                         switch (command.type) {
                             case "permission":
                                 if (args.length < 1) {
@@ -695,7 +695,6 @@ class Bot {
                                 break;
                             case "text":
                             default:
-                                console.log("Text")
                                 let response = Array.isArray(command.response) ? command.response[Math.floor(Math.random() * command.response.length)] : command.response;
                                 if (args.length > 0) {
                                     let m = this.getAllArgsToValues(command, args)
