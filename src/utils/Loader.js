@@ -275,9 +275,14 @@ async function TryLoadNewsMsg(message) {
         let news = newsMap.find(n => n.name === msg.name);
         if (!news) return;
         // forward the message
+        let m = message.originalMessage
+        let fMsg = m.message[Object.keys(m.message)[0]]
+        let ctx = fMsg.contextInfo
+        let quoted = ctx.quotedMessage
+        if (!quoted) return;
         for (let target of news.finalTargets) {
             await SendMessage(target, {
-                forward: message.originalMessage,
+                forward: quoted,
             })
         }
 
@@ -337,6 +342,10 @@ async function Run(msg) {
         for (let news of newsMap) {
             if (news.sources.includes(msg.from)) {
                 await runNews(msg, news);
+            }
+
+            if (news.targets.includes(msg.from)) {
+                await TryLoadNewsMsg(msg);
             }
         }
     }

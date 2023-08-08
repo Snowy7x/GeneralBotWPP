@@ -159,7 +159,7 @@ class Competition {
         this.currentQuestion = 1;
         await SendMessage(this.group, {
             text: `المسابقة بدأت!
-النوع: ${this.type}`,
+النوع: ${this.cat}`,
         })
         let text = "السؤال رقم " + (this.currentQuestion) + " من " + this.maxQuestions
         switch (this.type) {
