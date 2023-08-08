@@ -392,9 +392,8 @@ class Bot {
                                             return
                                         }
 
-                                        let comp = this.comps.createCompetition(chat, questionsCount, comType);
+                                        let comp = this.comps.createCompetition(chat, questionsCount, comType, this.cat);
                                         if (comp) {
-                                            await msg.reply("تم بدأ المسابقة")
                                             comp.start()
                                         } else {
                                             await msg.reply("لم أسطتع بدأ مسابقة في هذه المجموعة")

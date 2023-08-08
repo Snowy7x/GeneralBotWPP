@@ -155,8 +155,12 @@ class Competition {
         }
     }
 
-    start() {
+    async start() {
         this.currentQuestion = 1;
+        await SendMessage(this.group, {
+            text: `المسابقة بدأت!
+النوع: ${this.type}`,
+        })
         let text = "السؤال رقم " + (this.currentQuestion) + " من " + this.maxQuestions
         switch (this.type) {
             case QuestionTypes.TEXT:
