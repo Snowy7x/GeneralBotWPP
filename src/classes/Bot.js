@@ -802,6 +802,7 @@ class Bot {
     InitClient(cl, comps) {
         this.client = cl;
         this.comps = comps;
+        console.log("Init client: " + comps)
     }
 
     GetGroupCat(msgFrom) {
