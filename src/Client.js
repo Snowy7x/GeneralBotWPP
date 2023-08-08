@@ -15,13 +15,6 @@ const com = new Competitions();
 
 const Store = makeInMemoryStore({});
 
-// can be read from a file
-Store.readFromFile("./baileys_store.json");
-// saves the state to a file every 10s
-setInterval(() => {
-    Store.writeToFile("./baileys_store.json");
-}, 10_000);
-
 
 /** @type {import("@whiskeysockets/baileys").WASocket}*/
 const client = makeWASocket({
@@ -93,7 +86,7 @@ client.ev.on("messages.upsert", async e => {
     }
 })
 
-client.ev.on("messages.reaction", async (b) => {
+/*client.ev.on("messages.reaction", async (b) => {
     let m = b[0]
     if (m.reaction.key.id.startsWith("BAE5") && m.reaction.key.id.length === 16) return;
     let mesg = await Store.loadMessage(m.reaction.key.remoteJid, m.key.id, client);
@@ -101,7 +94,7 @@ client.ev.on("messages.reaction", async (b) => {
     let frum = m.key.remoteJid.endsWith("@g.us") ? m.key.participant : m.key.remoteJid;
     let msg = await CreateMessage(mesg)
     await TryLoadNewsMsg(msg)
-})
+})*/
 
 /**
  * @param {string | null} to
