@@ -228,11 +228,11 @@ async function runNews(msg, news) {
         }
 
         let newsMap = JSON.parse(data);
-        newsMap.push({
+        newsMap[sentMsg.key.id] = {
             msgId: sentMsg.key.id,
             name: news.name,
             from: msg.author,
-        });
+        };
 
         fs.writeFile(path.join(currFolder, "../Data/news.json"), JSON.stringify(newsMap), (err) => {
             if (err) {
@@ -266,33 +266,65 @@ async function TryLoadNewsMsg(message) {
         }
 
         let newsList = JSON.parse(data);
-        // Check if the message is already loaded
-        let msg = newsList.find(n => n.msgId === message.key.id);
-        if (!msg) return;
 
-
-        // Get the news
-        let news = newsMap.find(n => n.name === msg.name);
-        if (!news) return;
         // forward the message
         let m = message.originalMessage
         let fMsg = m.message[Object.keys(m.message)[0]]
         let ctx = fMsg.contextInfo
         let quoted = ctx.quotedMessage
+        let id = ctx.stanzaId
         if (!quoted) return;
+        console.log(quoted)
+        quoted.message = quoted
+
+        // Check if the message is already loaded
+        console.log(id)
+        let newsListElement = newsList[id]
+        if (!newsListElement) return;
+
+        // Get the news
+        let news = newsMap.find(n => n.name === newsListElement.name);
+        if (!news) return;
+
+        quoted.key = {
+            id: id,
+            remoteJid: message.key.remoteJid,
+            participant: ctx.participant,
+            fromMe: true
+        }
+        let newMsg = await CreateMessage(quoted)
+        let content = newMsg.body;
+        let media = null;
+        if (newMsg.hasMedia) {
+            media = await downloadMediaMessage(newMsg.originalMessage, "buffer", {})
+        }
         for (let target of news.finalTargets) {
-            await SendMessage(target, {
-                forward: quoted,
-            })
+            if (media) {
+                const options = {
+                    caption: content,
+                }
+                if (newMsg.mediaType === "video") {
+                    options.video = media;
+                }else if (newMsg.mediaType === "image") {
+                    options.image = media;
+                }
+                console.log(target, options)
+                await SendMessage(target, options);
+            }else {
+                console.log(target, content)
+                await SendMessage(target, {
+                    text: content,
+                });
+            }
         }
 
         // remove the message from the news.json file
-        newsList = newsList.filter(n => n.msgId !== message.key.id);
+        delete newsList[id];
         fs.writeFile(path.join(currFolder, "../Data/news.json"), JSON.stringify(newsList), (err) => {
             if (err) {
                 console.error(err);
             }
-        })
+        });
     });
     // Check if the message is already loaded
 
