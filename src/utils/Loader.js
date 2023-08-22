@@ -292,6 +292,7 @@ async function TryLoadNewsMsg(message) {
         let newsListElement = newsList[id];
         console.log(`Found Quoted Message[${id}]: ${newsListElement}`)
         if (!newsListElement) return;
+        if (newsListElement.sent) return;
         console.log("Found News: " + newsListElement.name)
 
         // Get the news
