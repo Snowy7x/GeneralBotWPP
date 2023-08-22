@@ -232,6 +232,8 @@ async function runNews(msg, news) {
             msgId: sentMsg.key.id,
             name: news.name,
             from: msg.author,
+            content: content,
+            sent: false,
         };
 
         fs.writeFile(path.join(currFolder, "../Data/news.json"), JSON.stringify(newsMap), (err) => {
@@ -248,7 +250,6 @@ async function runNews(msg, news) {
  * @constructor
  */
 async function TryLoadNewsMsg(message) {
-    console.log("Checking for news message...")
     // check if folder exists
     if (!fs.existsSync(path.join(currFolder, "../Data"))) {
         fs.mkdirSync(path.join(currFolder, "../Data"));
@@ -271,21 +272,12 @@ async function TryLoadNewsMsg(message) {
         // forward the message
         let m = message.originalMessage
         let fMsg = m.message[Object.keys(m.message)[0]]
-        let ctx = fMsg.contextInfo
-        let quoted = ctx.quotedMessage
-        let id = ctx.stanzaId
+        let ctx = fMsg?.contextInfo
+        if (!ctx) return;
+        let quoted = ctx?.quotedMessage
+        let id = ctx?.stanzaId
         if (!quoted) return;
-        console.log(quoted)
         quoted.message = quoted
-
-        // Check if the message is already loaded
-        console.log(id)
-        let newsListElement = newsList[id]
-        if (!newsListElement) return;
-
-        // Get the news
-        let news = newsMap.find(n => n.name === newsListElement.name);
-        if (!news) return;
 
         quoted.key = {
             id: id,
@@ -295,6 +287,24 @@ async function TryLoadNewsMsg(message) {
         }
         let newMsg = await CreateMessage(quoted)
         let content = newMsg.body;
+
+        // Check if the message is already loaded
+        console.log("Found Quoted Message: " + id)
+        let newsListElement = Object.keys(newsList).map(k => {
+            if (!newsList[k].sent && newsList[k].content === content) {
+                return {
+                    ...newsList[k],
+                }
+            }
+        })[0]
+        if (!newsListElement) return;
+        console.log("Found News: " + newsListElement.name)
+
+        // Get the news
+        let news = newsMap.find(n => n.name === newsListElement.name);
+        if (!news) return;
+
+
         let media = null;
         if (newMsg.hasMedia) {
             media = await downloadMediaMessage(newMsg.originalMessage, "buffer", {})
@@ -320,7 +330,8 @@ async function TryLoadNewsMsg(message) {
         }
 
         // remove the message from the news.json file
-        delete newsList[id];
+        newsListElement.sent = true;
+        newsList[newsListElement.msgId] = newsListElement;
         fs.writeFile(path.join(currFolder, "../Data/news.json"), JSON.stringify(newsList), (err) => {
             if (err) {
                 console.error(err);

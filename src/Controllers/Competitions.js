@@ -11,17 +11,17 @@ class Competitions {
         console.log("Competitions initialized");
 
         // check if the cache folder exists:
-        if (!fs.existsSync("./cache")) {
-            fs.mkdirSync("./cache");
+        if (!fs.existsSync("./cache2")) {
+            fs.mkdirSync("./cache2");
         }
 
         // check if the competition.json file exists:
-        if (!fs.existsSync("./cache/competition.json")) {
-            fs.writeFileSync("./cache/competition.json", "{}");
+        if (!fs.existsSync("./cache2/competition.json")) {
+            fs.writeFileSync("./cache2/competition.json", "{}");
         }
 
         // load the competitions from the cache:
-        fs.readFile("./cache/competition.json", async (err, file) => {
+        fs.readFile("./cache2/competition.json", async (err, file) => {
             if (err) console.log(err);
             let jsonFile = JSON.parse(file);
             for (let group in jsonFile) {
@@ -51,11 +51,11 @@ class Competitions {
         this.competitions.splice(this.competitions.indexOf(comp), 1);
 
         // remove the competition from the cache:
-        fs.readFile("./cache/competition.json", (err, file) => {
+        fs.readFile("./cache2/competition.json", (err, file) => {
             if (err) console.log(err);
             let jsonFile = JSON.parse(file);
             delete jsonFile[comp.group];
-            fs.writeFile("./cache/competition.json", JSON.stringify(jsonFile), (err) => {
+            fs.writeFile("./cache2/competition.json", JSON.stringify(jsonFile), (err) => {
                 if (err) console.log(err);
             });
         });
@@ -85,7 +85,7 @@ class Competitions {
 
     async cacheCompetition(comp){
         // get the json file:
-        await fs.readFile("./cache/competition.json", async (err, file) => {
+        await fs.readFile("./cache2/competition.json", async (err, file) => {
             if (err) console.log(err);
             // parse it:
             let jsonFile = JSON.parse(file);
@@ -102,7 +102,7 @@ class Competitions {
 
             jsonFile[comp.group] = json;
             // write it to the file:
-            await fs.writeFile("./cache/competition.json", JSON.stringify(jsonFile), (err) => {
+            await fs.writeFile("./cache2/competition.json", JSON.stringify(jsonFile), (err) => {
                 if (err) console.log(err);
             });
         });
