@@ -289,14 +289,8 @@ async function TryLoadNewsMsg(message) {
         let content = newMsg.body;
 
         // Check if the message is already loaded
-        console.log("Found Quoted Message: " + id)
-        let newsListElement = Object.keys(newsList).map(k => {
-            if (!newsList[k].sent && newsList[k].content === content) {
-                return {
-                    ...newsList[k],
-                }
-            }
-        })[0]
+        let newsListElement = newsList[id];
+        console.log(`Found Quoted Message[${id}]: ${newsListElement}`)
         if (!newsListElement) return;
         console.log("Found News: " + newsListElement.name)
 
