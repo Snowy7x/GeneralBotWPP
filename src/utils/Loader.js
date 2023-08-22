@@ -248,6 +248,7 @@ async function runNews(msg, news) {
  * @constructor
  */
 async function TryLoadNewsMsg(message) {
+    console.log("Checking for news message...")
     // check if folder exists
     if (!fs.existsSync(path.join(currFolder, "../Data"))) {
         fs.mkdirSync(path.join(currFolder, "../Data"));
@@ -375,7 +376,6 @@ async function Run(msg) {
             if (news.sources.includes(msg.from)) {
                 await runNews(msg, news);
             }
-
             if (news.targets.includes(msg.from)) {
                 await TryLoadNewsMsg(msg);
             }
