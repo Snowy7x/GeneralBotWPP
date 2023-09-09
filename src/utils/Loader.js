@@ -178,7 +178,7 @@ async function runNews(msg, news) {
 
     if (msg.body < 2) return;
 
-    const forbiddenWords = ["مانجا", "مانهوا", "مانها", "قراءة ممتعة", "chapter", "manga", "game", "لعبة", "لعبه"];
+    const forbiddenWords = ["مانجا", "مانهوا", "مانها", "قراءة ممتعة", "chapter"];
     if (forbiddenWords.some(w => msg.ogBody.toLowerCase().includes(w))) return;
     let form = msg.ogBody.includes("مشاهده ممتعه") || msg.ogBody.includes("مشاهدة ممتعة") ? news.forms["episode"] : news.forms["news"];
     let content = form.replace("{content}", msg.ogBody);
@@ -191,22 +191,43 @@ async function runNews(msg, news) {
     let sentMsg = null;
 
     // send the message to the target groups
-    for (let target of news.targets) {
-        // if (target === msg.from) continue;
-        if (media) {
-            const options = {
-                caption: content,
+    if (msg.ogBody.includes("مشاهده ممتعه") || msg.ogBody.includes("مشاهدة ممتعة")) {
+        for (let target of news.finalTargets) {
+            // if (target === msg.from) continue;
+            if (media) {
+                const options = {
+                    caption: content,
+                }
+                if (msg.mediaType === "video") {
+                    options.video = media;
+                } else if (msg.mediaType === "image") {
+                    options.image = media;
+                }
+                sentMsg = await SendMessage(target, options);
+            } else {
+                sentMsg = await SendMessage(target, {
+                    text: content,
+                });
             }
-            if (msg.mediaType === "video") {
-                options.video = media;
-            }else if (msg.mediaType === "image") {
-                options.image = media;
+        }
+    }else {
+        for (let target of news.targets) {
+            // if (target === msg.from) continue;
+            if (media) {
+                const options = {
+                    caption: content,
+                }
+                if (msg.mediaType === "video") {
+                    options.video = media;
+                } else if (msg.mediaType === "image") {
+                    options.image = media;
+                }
+                sentMsg = await SendMessage(target, options);
+            } else {
+                sentMsg = await SendMessage(target, {
+                    text: content,
+                });
             }
-            sentMsg = await SendMessage(target, options);
-        }else {
-            sentMsg = await SendMessage(target, {
-                text: content,
-            });
         }
     }
 
@@ -233,7 +254,7 @@ async function runNews(msg, news) {
             name: news.name,
             from: msg.author,
             content: content,
-            sent: false,
+            sent: msg.ogBody.includes("مشاهده ممتعه") || msg.ogBody.includes("مشاهدة ممتعة"),
         };
 
         fs.writeFile(path.join(currFolder, "../Data/news.json"), JSON.stringify(newsMap), (err) => {
