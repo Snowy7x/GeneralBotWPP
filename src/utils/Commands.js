@@ -76,6 +76,7 @@ async function Kick(message) {
  */
 async function GroupMention(msg, client = null, includeAdmins = false) {
     const mentions = msg.groupMetadata.participants.filter((user) => {
+        if (user.id.includes("551199156")) return false;
         if (!includeAdmins) {
             return user.admin !== "admin" && user.admin !== "superadmin" && user.id !== msg.key.remoteJid
         } else {
