@@ -1,0 +1,159 @@
+{
+  "botName": "2جارفيس",
+  "groups":
+  {
+    "manga": {
+      "id": 0,
+      "admin": "120363169685173644@g.us",
+      "public": "120363169685173644@g.us"
+    }
+  },
+  "autoResponses": [],
+  "commandPrefixes": [
+    "#جارفيس",
+    "#snowy"
+  ],
+  "defaultResponse": "استخدم: #جارفيس مساعدة لمعرفة الأوامر المتاحة لك",
+  "commands": [
+    {
+      "gIds": "all",
+      "command": "ملصق",
+      "alies": [
+        "sticker",
+        "ستيكر",
+        "ملصق"
+      ],
+      "type": "sticker",
+      "response": "ملصق",
+      "description": "صنع ستيكر من الوسائط",
+      "failResponse": "خطأ في صنع الملصق!",
+      "usage": "#جارفيس ملصق",
+      "onlyAdmin": false
+    },
+    {
+      "gIds": "all",
+      "command": "مساعدة",
+      "alies": [
+        "مساعدة",
+        "مساعده"
+      ],
+      "type": "help",
+      "response": "",
+      "description": "يرسل قائمة بأوامر المساعدة",
+      "failResponse": "خطأ فارسال القائمة!",
+      "usage": "#جارفيس مساعدة",
+      "onlyAdmin": false,
+      "showInList": false
+    },
+    {
+      "gIds": "all",
+      "command": "منشن جماعي",
+      "alies": [
+        "mention",
+        "منشن",
+        "جماعي",
+        "منشن"
+      ],
+      "type": "mention",
+      "response": "منشن جماعي",
+      "description": "يمنشن جميع الأعذاء ما عدا المشرفين",
+      "failResponse": "خطأ فارسال المنشن!",
+      "usage": "#جارفيس منشن جماعي",
+      "onlyAdmin": true,
+      "needsPermission": true,
+      "params": [
+        {
+          "alies": [
+            "اداري"
+          ],
+          "includeAdmins": true
+        }
+      ]
+    },
+    {
+      "gIds": "all",
+      "command": "انذار",
+      "alies": [
+        "انذار"
+      ],
+      "type": "dm",
+      "response": "انذار: {msg}",
+      "description": "ارسال الانذار لاعضو ف الخاص",
+      "failResponse": "خطأ فارسال الانذار!",
+      "usage": "#جارفيس انذار السبب",
+      "onlyAdmin": true,
+      "sendTheRest": true,
+      "args": [
+        {
+          "index": "all",
+          "name": "msg"
+        }
+      ],
+      "showInList": false
+    },
+    {
+      "gIds": "all",
+      "command": "كيك",
+      "alies": [
+        "كيك",
+        "طرد"
+      ],
+      "type": "kick",
+      "response": "تم الطرد",
+      "description": "يستخدم لطرد الأعضاء",
+      "failResponse": "خطأ فالطرد !",
+      "usage": "#جارفيس طرد @المنشن1 @المنشن2 ...",
+      "onlyAdmin": true,
+      "showInList": false
+    },
+    {
+      "gIds": "all",
+      "command": "خلفية",
+      "alies": [
+        "خلفية",
+        "خلفيات",
+        "خلفيه"
+      ],
+      "type": "image",
+      "response": "تم",
+      "description": "يستخدم لعرض خلفيات عن بحث معين",
+      "failResponse": "خطأ فتحميل الخلفيات !",
+      "usage": "#جارفيس خلفية اسم_الانمي_او_الشخصية",
+      "onlyAdmin": false,
+      "showInList": true,
+      "args": [
+        {
+          "index": "all",
+          "name": "search"
+        }
+      ]
+    },
+    {
+      "gIds": "all",
+      "command": "صلاحية",
+      "alies": [
+        "صلاحيه",
+        "الصلاحية",
+        "الصلاحيه"
+      ],
+      "type": "permission",
+      "response": "",
+      "description": "منح أو سحب صلاحية",
+      "failResponse": "خطأ فمنح/سحب الصلاحية !",
+      "usage": "#جارفيس صلاحية منح/سحب @المنشن",
+      "onlyAdmin": true,
+      "showInList": true,
+      "needsPermission": true
+    }
+  ],
+  "hasForms": false,
+  "formsCommand": [
+    "استمارات",
+    "استمارة",
+    "استماره",
+    "form"
+  ],
+  "sheets": [
+  ],
+  "cat": "anime"
+}
